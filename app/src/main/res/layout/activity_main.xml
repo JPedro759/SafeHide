@@ -14,35 +14,30 @@
         android:layout_marginTop="50dp"
         android:src="@drawable/safehideicon" />
 
-    <Button
-        android:layout_width="170dp"
-        android:layout_height="170dp"
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="160dp"
+        android:layout_height="160dp"
         android:layout_gravity="center"
-        android:layout_marginTop="50dp"
-        android:backgroundTint="@color/gray"
-        android:shadowColor="#F8F8F8"
-        android:shadowDx="100"
-        android:shadowDy="100"
+        android:layout_marginTop="70dp"
+        android:background="@drawable/buttonhide_style"
+        android:fontFamily="@font/jetbrains_mono_bold"
         android:text="Hide"
         android:textColor="@color/cyan"
         android:textSize="35dp"
         android:textStyle="bold" />
 
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="240dp"
-        android:layout_height="170dp"
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="260dp"
+        android:layout_height="150dp"
         android:layout_gravity="center"
-        android:layout_marginTop="50dp"
-        android:backgroundTint="@color/gray"
-        android:fontFamily="monospace"
+        android:layout_marginTop="75dp"
+        android:padding="42.5dp"
+        android:background="@drawable/buttonfolder_style"
+        android:fontFamily="@font/jetbrains_mono_bold"
         android:text="Secure Folder"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:visibility="visible"
-        app:icon="@drawable/folder"
-        tools:ignore="TextSizeCheck" />
+        android:drawableLeft="@drawable/shield_icon"/>
 
 </LinearLayout>
