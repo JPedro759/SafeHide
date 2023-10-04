@@ -4,24 +4,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/home"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="SafeHide"
-        android:textSize="36sp"
-        android:textColor="@color/black"
-        android:textStyle="bold"
-        android:gravity="center"
-        />
-    
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:src="@drawable/safehideicon"
-        />
+        android:layout_height="70dp"
+        android:layout_marginTop="50dp"
+        android:src="@drawable/safehideicon" />
 
+    <Button
+        android:layout_width="170dp"
+        android:layout_height="170dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:backgroundTint="@color/gray"
+        android:shadowColor="#F8F8F8"
+        android:shadowDx="100"
+        android:shadowDy="100"
+        android:text="Hide"
+        android:textColor="@color/cyan"
+        android:textSize="35dp"
+        android:textStyle="bold" />
+
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="240dp"
+        android:layout_height="170dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:backgroundTint="@color/gray"
+        android:fontFamily="monospace"
+        android:text="Secure Folder"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="visible"
+        app:icon="@drawable/folder"
+        tools:ignore="TextSizeCheck" />
 
 </LinearLayout>
