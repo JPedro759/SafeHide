@@ -9,8 +9,8 @@
 
     <Button
         android:id="@+id/buttonback"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginLeft="25dp"
         android:layout_marginTop="25dp"
         android:background="@drawable/arrowback"/>
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         app:srcCompat="@drawable/folder"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="30dp"
         />
 
     <FrameLayout
