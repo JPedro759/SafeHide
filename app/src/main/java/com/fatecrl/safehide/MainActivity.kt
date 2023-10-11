@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
                 val data: Intent? = result.data
                 if (data != null) {
                     val selectedImageUri: Uri? = data.data
-                    // Faça algo com a URI da imagem selecionada, como exibi-la em uma ImageView.
+                    // Faça algo com a URI da imagem selecionada.
                 }
             }
         }
