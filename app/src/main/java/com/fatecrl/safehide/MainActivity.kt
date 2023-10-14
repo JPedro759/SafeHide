@@ -18,13 +18,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val buttonSecureFolder = findViewById<Button>(R.id.buttonSecureFolder)
-
-        buttonSecureFolder.setOnClickListener {
-            val intent = Intent(this, SecureFolderActivity::class.java)
-            startActivity(intent)
-        }
-
         val buttonHide = findViewById<Button>(R.id.buttonHide)
 
         // Inicialize o imagePicker
@@ -33,7 +26,8 @@ class MainActivity : AppCompatActivity() {
                 val data: Intent? = result.data
                 if (data != null) {
                     val selectedImageUri: Uri? = data.data
-                    // Faça algo com a URI da imagem selecionada.
+
+                    // Passar a imagem para a Lista
                 }
             }
         }
