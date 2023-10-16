@@ -5,21 +5,23 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.fatecrl.safehide.R
+import com.fatecrl.safehide.model.TaskItem
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
 class EmptyListFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var recyclerView: RecyclerView
+    private val taskList = mutableListOf<TaskItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            //param1 = it.getString(ARG_PARAM1)
+            //param2 = it.getString(ARG_PARAM2)
         }
     }
 
@@ -28,7 +30,18 @@ class EmptyListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_empty_list, container, false)
+        val view = inflater.inflate(R.layout.fragment_empty_list, container, false)
+        recyclerView = view.findViewById(R.id.recyclerView)
+
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        //recyclerView.adapter = TaskAdapter(taskList)
+
+        // Adicione itens à lista de tarefas
+       // taskList.add(TaskItem("Tarefa 1", R.drawable.image1))
+        //taskList.add(TaskItem("Tarefa 2", R.drawable.image2))
+        // Adicione mais tarefas conforme necessário
+
+        return view
     }
 
     companion object {

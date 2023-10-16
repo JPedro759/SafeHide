@@ -17,4 +17,10 @@
         android:textColor="@color/cyan"
         android:textSize="16dp" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="365dp"
+        android:layout_height="610dp"
+        android:layout_gravity="center" />
+
 </FrameLayout>
