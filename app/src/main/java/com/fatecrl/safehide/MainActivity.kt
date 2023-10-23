@@ -1,11 +1,13 @@
 package com.fatecrl.safehide
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import com.fatecrl.safehide.adapter.FileAdapter
 
 class MainActivity : AppCompatActivity() {
@@ -17,16 +19,25 @@ class MainActivity : AppCompatActivity() {
             val data = result.data
             val imageUri = data?.data
             if (imageUri != null) {
-                FileAdapter().addImage(imageUri.toString())
+                // Adicione a imagem à instância existente do adaptador
+                fileAdapter.addImage(imageUri)
             }
         }
     }
 
-    val buttonHide = findViewById<Button>(R.id.buttonHide)
+    lateinit var buttonHide: Button
+    private val fileAdapter = FileAdapter() // Instância do adaptador
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        buttonHide = findViewById(R.id.buttonHide)
+
+        val recyclerViewLayout = layoutInflater.inflate(R.layout.fragment_file_list, null)
+        // Configure o RecyclerView com o adaptador
+        val recyclerView = recyclerViewLayout.findViewById<RecyclerView>(R.id.fileList)
+        recyclerView.adapter = fileAdapter
 
         buttonHide.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)

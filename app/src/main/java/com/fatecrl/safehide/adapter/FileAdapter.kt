@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fatecrl.safehide.R
 
 class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
-    private val imageList = mutableListOf<String>()
+    private val fileList = mutableListOf<Uri>() // Use Uri em vez de String
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_list, parent, false)
@@ -17,17 +17,17 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        val imageUri = imageList[position]
-        holder.imageView.setImageURI(Uri.parse(imageUri))
+        val imageUri = fileList[position]
+        holder.imageView.setImageURI(imageUri)
     }
 
     override fun getItemCount(): Int {
-        return imageList.size
+        return fileList.size
     }
 
-    fun addImage(imageUri: String) {
-        imageList.add(imageUri)
-        notifyDataSetChanged()
+    fun addImage(imageUri: Uri) {
+        fileList.add(imageUri)
+        notifyItemInserted(fileList.size - 1) // Notifique apenas a inserção deste item
     }
 
     inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
