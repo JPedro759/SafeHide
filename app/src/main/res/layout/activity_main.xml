@@ -29,12 +29,12 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainerView"
-        android:name="com.fatecrl.safehide.fragments.EmptyListFragment"
-        android:layout_marginTop="40dp"
+        android:name="com.fatecrl.safehide.fragments.FileListFragment"
         android:layout_width="340dp"
-        android:layout_height="340dp"
+        android:layout_height="350dp"
         android:layout_gravity="center"
-        tools:layout="@layout/fragment_empty_list" />
+        android:layout_marginTop="30dp"
+        tools:layout="@layout/fragment_file_list" />
 
 
 </LinearLayout>
