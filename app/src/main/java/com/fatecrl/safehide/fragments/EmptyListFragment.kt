@@ -8,7 +8,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fatecrl.safehide.R
-import com.fatecrl.safehide.model.TaskItem
+import com.fatecrl.safehide.adapter.TaskAdapter
+import com.fatecrl.safehide.adapter.model.TaskItem
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -31,15 +32,12 @@ class EmptyListFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_empty_list, container, false)
-        recyclerView = view.findViewById(R.id.recyclerView)
+        recyclerView = view.findViewById(R.id.imageList)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        //recyclerView.adapter = TaskAdapter(taskList)
+        recyclerView.adapter = TaskAdapter(taskList)
 
-        // Adicione itens à lista de tarefas
-       // taskList.add(TaskItem("Tarefa 1", R.drawable.image1))
-        //taskList.add(TaskItem("Tarefa 2", R.drawable.image2))
-        // Adicione mais tarefas conforme necessário
+        // ?
 
         return view
     }

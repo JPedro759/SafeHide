@@ -29,7 +29,7 @@
             android:id="@+id/deleteFile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="368dp"
+            android:layout_marginStart="352dp"
             android:src="@drawable/delete_icon"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

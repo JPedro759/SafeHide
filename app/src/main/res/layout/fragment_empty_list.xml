@@ -18,9 +18,9 @@
         android:textSize="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="365dp"
-        android:layout_height="610dp"
+        android:id="@+id/imageList"
+        android:layout_width="310dp"
+        android:layout_height="310dp"
         android:layout_gravity="center" />
 
 </FrameLayout>
