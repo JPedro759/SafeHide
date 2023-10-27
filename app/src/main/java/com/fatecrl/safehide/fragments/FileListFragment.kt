@@ -2,6 +2,7 @@ package com.fatecrl.safehide.fragments
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,19 +16,21 @@ class FileListFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private val fileAdapter = FileAdapter()
 
+    // Método para definir o adaptador a ser usado
+    fun setAdapter(adapter: FileAdapter) {
+        recyclerView.adapter = adapter
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_file_list, container, false)
+
         recyclerView = view.findViewById(R.id.fileList)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = fileAdapter
 
         return view
-    }
-
-    fun addImage(imageUri: Uri) {
-        fileAdapter.addImage(imageUri)
     }
 }

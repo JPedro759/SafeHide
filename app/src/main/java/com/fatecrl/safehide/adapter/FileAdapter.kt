@@ -1,6 +1,7 @@
 package com.fatecrl.safehide.adapter
 
 import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +27,8 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
     }
 
     fun addImage(imageUri: Uri) {
+        Log.d("FileAdapter", "Adicionando imagem: $imageUri")
+
         fileList.add(imageUri)
         notifyItemInserted(fileList.size - 1) // Notifique apenas a inserção deste item
     }

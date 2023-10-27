@@ -9,6 +9,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.fatecrl.safehide.adapter.FileAdapter
+import com.fatecrl.safehide.fragments.FileListFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     lateinit var buttonHide: Button
-    private val fileAdapter = FileAdapter() // Instância do adaptador
+    private val fileAdapter = FileAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,10 +35,10 @@ class MainActivity : AppCompatActivity() {
 
         buttonHide = findViewById(R.id.buttonHide)
 
-        val recyclerViewLayout = layoutInflater.inflate(R.layout.fragment_file_list, null)
-        // Configure o RecyclerView com o adaptador
-        val recyclerView = recyclerViewLayout.findViewById<RecyclerView>(R.id.fileList)
-        recyclerView.adapter = fileAdapter
+        val fileListFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as FileListFragment
+
+        // Configure o RecyclerView no fragmento com o adaptador
+        fileListFragment.setAdapter(fileAdapter)
 
         buttonHide.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)

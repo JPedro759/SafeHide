@@ -27,7 +27,7 @@
         android:textSize="30dp"
         android:textStyle="bold" />
 
-    <androidx.fragment.app.FragmentContainerView
+    <fragment
         android:id="@+id/fragmentContainerView"
         android:name="com.fatecrl.safehide.fragments.FileListFragment"
         android:layout_width="340dp"
