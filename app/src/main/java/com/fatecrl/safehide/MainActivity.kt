@@ -1,17 +1,18 @@
 package com.fatecrl.safehide
 
-import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
 import com.fatecrl.safehide.adapter.FileAdapter
+import com.fatecrl.safehide.adapter.ImageDeleteListener
 import com.fatecrl.safehide.fragments.FileListFragment
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ImageDeleteListener {
 
     private val pickImages: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -37,8 +38,9 @@ class MainActivity : AppCompatActivity() {
 
         val fileListFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as FileListFragment
 
-        // Configure o RecyclerView no fragmento com o adaptador
         fileListFragment.setAdapter(fileAdapter)
+
+        fileAdapter.setDeleteListener(this)
 
         buttonHide.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
@@ -46,5 +48,9 @@ class MainActivity : AppCompatActivity() {
             intent.type = "image/*"
             pickImages.launch(intent)
         }
+    }
+
+    override fun onDeleteImage(imageUri: Uri) {
+        fileAdapter.removeImage(imageUri)
     }
 }
