@@ -30,15 +30,9 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
             holder.imageView.setImageURI(imageUri)
 
             holder.buttonDelete.setOnClickListener {
-                val imageUri = fileList[position]
+                Log.d(imageUri.toString(), "Uri: $imageUri")
+                Log.d(imageUri.toString(), "Uri List: ${fileList}")
 
-                // Remover a imagem da lista
-                fileList.removeAt(position)
-
-                // Notificar o adaptador sobre a remoção
-                notifyItemRemoved(position)
-
-                // Chamar o método onDeleteImage após notificar o adaptador
                 deleteListener?.onDeleteImage(imageUri)
             }
         }
@@ -60,9 +54,11 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
     fun removeImage(imageUri: Uri) {
         val position = fileList.indexOf(imageUri)
         if (position != -1 && position < fileList.size) {
+            Log.d(position.toString(), "1 Position: $position")
             fileList.removeAt(position)
             notifyItemRemoved(position)
         }
+        Log.d(position.toString(), "2 Position: $position")
     }
 
     inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
