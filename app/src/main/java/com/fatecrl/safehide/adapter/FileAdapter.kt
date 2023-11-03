@@ -1,5 +1,6 @@
 package com.fatecrl.safehide.adapter
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,9 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.fatecrl.safehide.MainActivity
 import com.fatecrl.safehide.R
+import com.google.android.material.snackbar.Snackbar
 
 interface ImageDeleteListener {
     fun onDeleteImage(imageUri: Uri)
@@ -18,6 +21,7 @@ interface ImageDeleteListener {
 class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
     private val fileList = mutableListOf<Uri>()
     private var deleteListener: ImageDeleteListener? = null
+    private var currentItemView: View? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_list, parent, false)
@@ -34,7 +38,20 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
                 Log.d(imageUri.toString(), "Uri List: ${fileList}")
 
                 deleteListener?.onDeleteImage(imageUri)
+
+                currentItemView = holder.itemView // Define o item atual
+                showImageDeletedMessage("Imagem removida da lista!")
             }
+        }
+    }
+
+    private fun showImageDeletedMessage(message: String) {
+        currentItemView?.let { view ->
+            val snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT)
+            val snackbarView = snackbar.view
+            val messageTextView = snackbarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+            messageTextView.maxLines = 3
+            snackbar.show()
         }
     }
 
@@ -43,8 +60,12 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
     }
 
     fun addImage(imageUri: Uri) {
-        fileList.add(imageUri)
-        notifyItemInserted(fileList.size - 1)
+        if (!fileList.contains(imageUri)) {
+            fileList.add(imageUri)
+            val lastItemPosition = fileList.size - 1
+            notifyItemInserted(lastItemPosition)
+            Log.d(imageUri.toString(), "ImageUri index: ${fileList.indexOf(imageUri)}")
+        }
     }
 
     fun setDeleteListener(listener: ImageDeleteListener) {
@@ -53,6 +74,7 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
 
     fun removeImage(imageUri: Uri) {
         val position = fileList.indexOf(imageUri)
+
         if (position != -1 && position < fileList.size) {
             Log.d(position.toString(), "1 Position: $position")
             fileList.removeAt(position)

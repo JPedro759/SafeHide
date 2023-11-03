@@ -4,10 +4,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
-import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import com.fatecrl.safehide.adapter.FileAdapter
 import com.fatecrl.safehide.adapter.ImageDeleteListener
 import com.fatecrl.safehide.fragments.FileListFragment
@@ -21,7 +21,6 @@ class MainActivity : AppCompatActivity(), ImageDeleteListener {
             val data = result.data
             val imageUri = data?.data
             if (imageUri != null) {
-                // Adicione a imagem à instância existente do adaptador
                 fileAdapter.addImage(imageUri)
             }
         }
