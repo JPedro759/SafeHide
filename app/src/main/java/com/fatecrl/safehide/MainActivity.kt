@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity(), ImageDeleteListener {
             val data = result.data
             val imageUri = data?.data
             if (imageUri != null) {
-                fileAdapter.addImage(imageUri)
+                fileAdapter.addImage(imageUri, applicationContext)
             }
         }
     }
@@ -50,6 +50,6 @@ class MainActivity : AppCompatActivity(), ImageDeleteListener {
     }
 
     override fun onDeleteImage(imageUri: Uri) {
-        fileAdapter.removeImage(imageUri)
+        fileAdapter.removeImage(imageUri, applicationContext)
     }
 }

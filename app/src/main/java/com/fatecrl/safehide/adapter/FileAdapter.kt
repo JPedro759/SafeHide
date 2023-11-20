@@ -9,10 +9,10 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fatecrl.safehide.R
 import com.google.android.material.snackbar.Snackbar
+import java.io.File
 
 interface ImageDeleteListener {
     fun onDeleteImage(imageUri: Uri)
@@ -59,28 +59,48 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
         return fileList.size
     }
 
-    fun addImage(imageUri: Uri) {
+    fun addImage(imageUri: Uri, context: Context) {
         if (!fileList.contains(imageUri)) {
-            fileList.add(imageUri)
+            // Salvar a imagem no armazenamento privado
+            val savedImageUri = saveImageToInternalStorage(imageUri, context)
+            fileList.add(savedImageUri)
             val lastItemPosition = fileList.size - 1
             notifyItemInserted(lastItemPosition)
-            Log.d(imageUri.toString(), "ImageUri index: ${fileList.indexOf(imageUri)}")
+            Log.d(savedImageUri.toString(), "Saved ImageUri index: ${fileList.indexOf(savedImageUri)}")
+            Log.d("File Path", "Path: ${context.filesDir.absolutePath}")
         }
+    }
+
+    private fun saveImageToInternalStorage(imageUri: Uri, context: Context): Uri {
+        val inputStream = context.contentResolver.openInputStream(imageUri)
+        val fileName = "image_${System.currentTimeMillis()}.jpg" // Nome do arquivo único
+        val outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE)
+
+        inputStream?.use { input ->
+            outputStream.use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        return Uri.fromFile(context.getFileStreamPath(fileName))
     }
 
     fun setDeleteListener(listener: ImageDeleteListener) {
         deleteListener = listener
     }
 
-    fun removeImage(imageUri: Uri) {
+    fun removeImage(imageUri: Uri, context: Context) {
         val position = fileList.indexOf(imageUri)
 
         if (position != -1 && position < fileList.size) {
-            Log.d(position.toString(), "1 Position: $position")
+            // Remove o arquivo do armazenamento interno
+            val fileToRemove = File(imageUri.path)
+            fileToRemove.delete()
+
+            // Remove o item da lista e notifica a mudança
             fileList.removeAt(position)
             notifyItemRemoved(position)
         }
-        Log.d(position.toString(), "2 Position: $position")
     }
 
     inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
