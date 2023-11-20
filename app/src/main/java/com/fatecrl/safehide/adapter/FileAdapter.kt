@@ -1,6 +1,8 @@
 package com.fatecrl.safehide.adapter
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,7 +14,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.fatecrl.safehide.R
 import com.google.android.material.snackbar.Snackbar
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.security.MessageDigest
 
 interface ImageDeleteListener {
     fun onDeleteImage(imageUri: Uri)
@@ -60,12 +64,12 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
     }
 
     fun addImage(imageUri: Uri, context: Context) {
-        if (!fileList.contains(imageUri)) {
-            // Salvar a imagem no armazenamento privado
-            val savedImageUri = saveImageToInternalStorage(imageUri, context)
+        // Salvar a imagem no armazenamento privado
+        val savedImageUri = saveImageToInternalStorage(imageUri, context)
+
+        if (!fileList.contains(savedImageUri)) {
             fileList.add(savedImageUri)
-            val lastItemPosition = fileList.size - 1
-            notifyItemInserted(lastItemPosition)
+            notifyItemInserted(fileList.size - 1)
             Log.d(savedImageUri.toString(), "Saved ImageUri index: ${fileList.indexOf(savedImageUri)}")
             Log.d("File Path", "Path: ${context.filesDir.absolutePath}")
         }
@@ -73,17 +77,27 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
 
     private fun saveImageToInternalStorage(imageUri: Uri, context: Context): Uri {
         val inputStream = context.contentResolver.openInputStream(imageUri)
-        val fileName = "image_${System.currentTimeMillis()}.jpg" // Nome do arquivo único
-        val outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE)
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+        val byteArray = byteArrayOutputStream.toByteArray()
 
-        inputStream?.use { input ->
-            outputStream.use { output ->
-                input.copyTo(output)
-            }
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hash = digest.digest(byteArray)
+        val fileName = "image_${hash.toHexString()}.jpg"
+
+        val file = context.getFileStreamPath(fileName)
+
+        if (!file.exists()) {
+            val outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE)
+            outputStream.write(byteArray)
+            outputStream.close()
         }
 
-        return Uri.fromFile(context.getFileStreamPath(fileName))
+        return Uri.fromFile(file)
     }
+
+    private fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
     fun setDeleteListener(listener: ImageDeleteListener) {
         deleteListener = listener
