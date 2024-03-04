@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/home"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/safehideicon" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/buttonHide"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/buttonhide_style"
+        android:fontFamily="@font/jetbrains_mono_bold"
+        android:text="Hide"
+        android:textColor="@color/cyan"
+        android:textSize="30dp"
+        android:textStyle="bold" />
+
+    <fragment
+        android:id="@+id/fragmentContainerView"
+        android:name="com.fatecrl.safehide.fragments.FileListFragment"
+        android:layout_width="340dp"
+        android:layout_height="345dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        tools:layout="@layout/fragment_file_list" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="© 2023 SafeHide. All rights reserved."
+        android:fontFamily="@font/jetbrains_mono_bold"
+        android:textColor="@color/white"
+        android:layout_gravity="center"
+        android:layout_marginTop="90dp"/>
+
+</LinearLayout>
