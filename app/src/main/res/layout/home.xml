@@ -39,7 +39,7 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="© 2023 SafeHide. All rights reserved."
+        android:text="@string/copyright"
         android:fontFamily="@font/jetbrains_mono_bold"
         android:textColor="@color/white"
         android:layout_gravity="center"

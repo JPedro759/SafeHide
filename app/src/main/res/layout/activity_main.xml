@@ -79,8 +79,9 @@
             android:fontFamily="@font/jetbrains_mono_semibold"
             android:text="@string/login"
             android:textAlignment="textStart"
-            android:textColor="@color/white"
-            android:textSize="15sp" />
+            android:textSize="15sp"
+            android:clickable="true"
+            />
     </LinearLayout>
 
 </LinearLayout>

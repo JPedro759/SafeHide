@@ -1,16 +1,19 @@
 package com.fatecrl.safehide
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class RegisterActivity : AppCompatActivity() {
-    lateinit var usernameInput: EditText;
-    lateinit var emailInput: EditText;
-    lateinit var passwordInput: EditText;
-    lateinit var repeatPasswordInput: EditText;
+    private lateinit var usernameInput: EditText
+    private lateinit var emailInput: EditText
+    private lateinit var passwordInput: EditText
+    private lateinit var repeatPasswordInput: EditText
+
     lateinit var btnRegister: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,15 +24,29 @@ class RegisterActivity : AppCompatActivity() {
         emailInput = findViewById(R.id.email_input)
         passwordInput = findViewById(R.id.password_input)
         repeatPasswordInput = findViewById(R.id.repeatPassword_input)
+
         btnRegister = findViewById(R.id.register_btn)
 
-        btnRegister.setOnClickListener(){
-            val username = usernameInput.text.toString();
-            val email = emailInput.text.toString();
-            val password = passwordInput.text.toString();
-            val repeatPassword = repeatPasswordInput.text.toString();
+        btnRegister.setOnClickListener {
+            val username = usernameInput.text.toString()
+            val email = emailInput.text.toString()
+            val password = passwordInput.text.toString()
+            val repeatPassword = repeatPasswordInput.text.toString()
 
-            Log.i("Test Credentials", "Username: $username | Email: $email | Password: $password | Confirm password: $repeatPassword");
+            if (username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && repeatPassword.isNotEmpty()) {
+                if (password == repeatPassword) {
+                    // Todos os campos estão preenchidos e as senhas coincidem
+                    Log.i("Test Credentials", "Username: $username | Email: $email | Password: $password | Confirm password: $repeatPassword")
+
+                    // Direcionar o usuário para a interface Home
+                    val intent = Intent(this, HomeActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this, "As senhas não coincidem!", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Por favor, preencha todos os campos!", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
