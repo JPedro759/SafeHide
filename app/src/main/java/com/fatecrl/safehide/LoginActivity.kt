@@ -1,4 +1,7 @@
 package com.fatecrl.safehide
 
-class LoginActivity {
+import androidx.appcompat.app.AppCompatActivity
+
+class LoginActivity : AppCompatActivity() {
+
 }

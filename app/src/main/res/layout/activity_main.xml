@@ -7,7 +7,6 @@
     android:orientation="vertical"
     tools:context="MainActivity">
 
-
     <TextView
         android:id="@+id/textPresentation"
         android:layout_width="match_parent"
@@ -44,7 +43,7 @@
         android:textSize="15sp" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/buttonRegister"
         android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -83,4 +82,5 @@
             android:textColor="@color/white"
             android:textSize="15sp" />
     </LinearLayout>
+
 </LinearLayout>

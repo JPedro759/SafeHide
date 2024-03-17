@@ -31,7 +31,7 @@ class HomeActivity : AppCompatActivity(), ImageDeleteListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.home)
 
         buttonHide = findViewById(R.id.buttonHide)
 
