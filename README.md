@@ -7,8 +7,8 @@ usar métodos convencionais de recuperação de acesso.
 
 # Tecnologias
 <div>
-  <img align="center" height="100" width="100" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kotlin/kotlin-original.svg" /> 
-  <img align="center" height="100" width="100" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/firebase/firebase-original-wordmark.svg" />
-  <img align="center" height="100" width="100" src="https://github.com/JPedro759/SafeHide/assets/77515431/c7eb6dc7-c630-4087-a4c8-56aec0441f33">
+  <img align="center" height="90" width="90" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kotlin/kotlin-original.svg" /> 
+  <img align="center" height="80" width="100" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/firebase/firebase-original.svg" />
+  <img align="center" height="80" width="80" src="https://github.com/JPedro759/SafeHide/assets/77515431/c7eb6dc7-c630-4087-a4c8-56aec0441f33">
       
 </div>
