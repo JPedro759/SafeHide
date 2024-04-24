@@ -15,6 +15,7 @@ class LoginActivity : AppCompatActivity() {
 
     lateinit var btnLogin: Button
     lateinit var forgotPassword: TextView
+    lateinit var btnBack: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,6 +23,7 @@ class LoginActivity : AppCompatActivity() {
 
         emailInput = findViewById(R.id.email_input)
         passwordInput = findViewById(R.id.password_input)
+        btnBack = findViewById(R.id.btn_back)
 
         btnLogin = findViewById(R.id.login_btn)
         btnLogin.setOnClickListener {
@@ -42,6 +44,11 @@ class LoginActivity : AppCompatActivity() {
         forgotPassword = findViewById(R.id.forgotPasswordLink)
         forgotPassword.setOnClickListener {
             val intent = Intent(this, ForgotPasswordActivity::class.java)
+            startActivity(intent)
+        }
+
+        btnBack.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
     }

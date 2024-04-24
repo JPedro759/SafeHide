@@ -13,12 +13,14 @@ class ForgotPasswordActivity : AppCompatActivity() {
     private lateinit var confirmPasswordInput: EditText
 
     lateinit var btnChangePassword: Button
+    lateinit var btnBack: Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.forgot_password)
 
         newPasswordInput = findViewById(R.id.newPassword_input)
         confirmPasswordInput = findViewById(R.id.confirmPassword_input)
+        btnBack = findViewById(R.id.btn_back)
 
         btnChangePassword = findViewById(R.id.changePassword_btn)
         btnChangePassword.setOnClickListener {
@@ -38,6 +40,11 @@ class ForgotPasswordActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Por favor, preencha todos os campos!", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        btnBack.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
     }
 }

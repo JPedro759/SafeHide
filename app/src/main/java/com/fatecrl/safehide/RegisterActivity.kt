@@ -15,6 +15,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var repeatPasswordInput: EditText
 
     lateinit var btnRegister: Button
+    lateinit var btnBack: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +27,7 @@ class RegisterActivity : AppCompatActivity() {
         repeatPasswordInput = findViewById(R.id.repeatPassword_input)
 
         btnRegister = findViewById(R.id.register_btn)
+        btnBack = findViewById(R.id.btn_back)
 
         btnRegister.setOnClickListener {
             val username = usernameInput.text.toString()
@@ -47,6 +49,11 @@ class RegisterActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Por favor, preencha todos os campos!", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        btnBack.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
     }
 }
