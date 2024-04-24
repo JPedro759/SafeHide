@@ -1,9 +1,7 @@
 # <img height="45" width="40" src="https://github.com/JPedro759/SafeHide/assets/77515431/e96c0538-663a-47b3-ad41-86636786052f"> SafeHide
 
 
-Aplicativo móvel que atua como pasta secreta, ocultando aplicativos e mídia (como fotos, vídeos e PDF). Sua principal característica de segurança é a capacidade de ocultar itens previamente selecionados por meio de uma chave especial.
-Se a chave for ativada acidentalmente, o usuário pode usar outro dispositivo (os aplicativos usados para gerar um código de recuperação também serão ocultados por padrão) para realizar uma verificação em duas etapas ou 
-usar métodos convencionais de recuperação de acesso.
+Aplicativo móvel que atua como pasta secreta, ocultando aplicativos e mídia (como fotos, vídeos e PDF). Sua principal característica de segurança é a capacidade de ocultar arquivos previamente selecionados por meio de uma chave especial.
 
 # Tecnologias
 <div>
