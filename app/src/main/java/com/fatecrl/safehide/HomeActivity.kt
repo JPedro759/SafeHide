@@ -29,6 +29,8 @@ class HomeActivity : AppCompatActivity(), ImageDeleteListener {
     lateinit var buttonHide: Button
     private val fileAdapter = FileAdapter()
 
+    lateinit var buttonProfile: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home)
@@ -46,6 +48,12 @@ class HomeActivity : AppCompatActivity(), ImageDeleteListener {
             intent.addCategory(Intent.CATEGORY_OPENABLE)
             intent.type = "image/*"
             pickImages.launch(intent)
+        }
+
+        buttonProfile = findViewById(R.id.btn_profile)
+        buttonProfile.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
         }
     }
 

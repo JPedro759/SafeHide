@@ -8,17 +8,26 @@
     tools:context=".MainActivity">
 
     <ImageView
-        android:layout_width="match_parent"
+        android:layout_width="75dp"
         android:layout_height="65dp"
         android:layout_marginTop="30dp"
+        android:layout_marginStart="168dp"
         android:src="@drawable/safehideicon" />
+
+    <Button
+        android:id="@+id/btn_profile"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="-55dp"
+        android:layout_marginStart="340dp"
+        android:background="@drawable/user_icon"/>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/buttonHide"
         android:layout_width="130dp"
         android:layout_height="130dp"
         android:layout_gravity="center"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="50dp"
         android:background="@drawable/buttonhide_style"
         android:fontFamily="@font/jetbrains_mono_bold"
         android:text="Hide"
@@ -44,5 +53,7 @@
         android:textColor="@color/white"
         android:layout_gravity="center"
         android:layout_marginTop="90dp"/>
+
+
 
 </LinearLayout>
