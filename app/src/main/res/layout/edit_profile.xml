@@ -38,7 +38,7 @@
             android:drawableStart="@drawable/user_icon"
             android:drawablePadding="7dp"
             android:hint="Novo nome"
-            android:inputType="textPassword"
+            android:inputType="textPersonName"
             android:padding="15dp"
             android:textColor="@color/black"
             android:textColorHint="@color/black"
@@ -53,14 +53,14 @@
             android:drawableStart="@drawable/email_icon"
             android:drawablePadding="7dp"
             android:hint="Novo email"
-            android:inputType="textPassword"
+            android:inputType="textEmailAddress"
             android:padding="15dp"
             android:textColor="@color/black"
             android:textColorHint="@color/black"
             android:textSize="17sp" />
 
         <EditText
-            android:id="@+id/newPssword_input"
+            android:id="@+id/newPassword_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -83,14 +83,14 @@
             android:drawableStart="@drawable/key_secret_edit"
             android:drawablePadding="7dp"
             android:hint="Nova senha secreta"
-            android:inputType="textPassword"
+            android:inputType="number"
             android:padding="15dp"
             android:textColor="@color/black"
             android:textColorHint="@color/black"
             android:textSize="17sp" />
 
         <Button
-            android:id="@+id/changePassword_btn"
+            android:id="@+id/btn_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"

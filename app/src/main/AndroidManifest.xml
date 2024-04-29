@@ -29,6 +29,9 @@
             android:name=".EditProfileActivity"
             android:exported="false" />
         <activity
+            android:name=".KeySecretPageActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

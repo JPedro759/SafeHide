@@ -100,7 +100,7 @@
         android:layout_marginTop="465dp"
         android:layout_toEndOf="@+id/profile_email"
         android:text="joaopedro@gmail.com"
-        android:textSize="15dp" />
+        android:textSize="15sp" />
 
     <ImageView
         android:id="@+id/profile_key_secret"
@@ -118,7 +118,7 @@
         android:layout_toEndOf="@+id/profile_key_secret"
         android:text="Senha Secreta"
         android:textColor="@color/black"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:textStyle="bold" />
 
     <TextView
@@ -128,7 +128,7 @@
         android:layout_marginTop="553dp"
         android:layout_toEndOf="@+id/profile_key_secret"
         android:text="password@12345!"
-        android:textSize="15dp" />
+        android:textSize="15sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -138,7 +138,7 @@
         android:layout_toEndOf="@+id/profile_email"
         android:text="Email"
         android:textColor="@color/black"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:textStyle="bold" />
 
     <Button

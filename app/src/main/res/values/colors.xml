@@ -10,5 +10,6 @@
     <color name="purple">#AA22D1</color>
     <color name="red">#D11507</color>
     <color name="dark_red">#B81414</color>
-
+    <color name="gold">#E6C619</color>
+    <color name="colorDefault">#DCDCDC</color>
 </resources>

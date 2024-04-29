@@ -96,7 +96,7 @@
             android:layout_marginTop="40dp"
             android:background="@drawable/gradient"
             android:fontFamily="@font/jetbrains_mono_bold"
-            android:text="Cadastrar"
+            android:text="Cadastrar conta"
             android:textColor="@color/white"
             android:textSize="17sp" />
 

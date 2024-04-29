@@ -41,7 +41,7 @@ class RegisterActivity : AppCompatActivity() {
                     Log.i("Test Credentials", "Username: $username | Email: $email | Password: $password | Confirm password: $repeatPassword")
 
                     // Direcionar o usuário para a interface Home
-                    val intent = Intent(this, HomeActivity::class.java)
+                    val intent = Intent(this, KeySecretPageActivity::class.java)
                     startActivity(intent)
                 } else {
                     Toast.makeText(this, "As senhas não coincidem!", Toast.LENGTH_SHORT).show()

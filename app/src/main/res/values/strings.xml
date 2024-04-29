@@ -4,5 +4,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="login"><a href="">Login</a></string>
     <string name="forgotPassword"><a href="">Esqueceu a senha?</a></string>
-    <string name="copyright">© 2023 SafeHide. All rights reserved.</string>
+    <string name="copyright">© 2024 SafeHide. All rights reserved.</string>
+    <string name="key_msg">A senha secreta servirá para ativar a criptografia dos arquivos na pasta segura quando for digitada.</string>
 </resources>
