@@ -43,7 +43,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="100dp"
         android:layout_marginEnd="143dp"
-        android:src="@drawable/jpedro" />
+        android:src="@drawable/user_profile" />
 
     <TextView
         android:id="@+id/textView3"
