@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.fatecrl.safehide" />
+                  <option name="mobileSdkAppId" value="1:594963044735:android:4b60953a60b66b500e624a" />
+                  <option name="projectId" value="app-safehide-f3301" />
+                  <option name="projectNumber" value="594963044735" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

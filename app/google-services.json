@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "594963044735",
+    "project_id": "app-safehide-f3301",
+    "storage_bucket": "app-safehide-f3301.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:594963044735:android:4b60953a60b66b500e624a",
+        "android_client_info": {
+          "package_name": "com.fatecrl.safehide"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzd01zgMtqxyTBBlCT8Ni7ghW7O6BofpM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

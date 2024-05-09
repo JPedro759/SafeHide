@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -66,4 +67,7 @@ dependencies {
     // Activity Result API
     implementation("androidx.activity:activity-ktx:1.8.0")
     implementation("androidx.activity:activity-compose:1.4.0")
+
+    //Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
 }
