@@ -10,30 +10,52 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class KeySecretPageActivity : AppCompatActivity() {
 
-    lateinit var keySecret : EditText
-    lateinit var cardCheck : CardView
-    lateinit var btnRegisterKey : Button
+    private lateinit var keySecret: EditText
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var mFirestore: FirebaseFirestore
+
+    private lateinit var cardCheck: CardView
+    private lateinit var btnRegisterKey: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.keysecret_page)
+
+        mAuth = FirebaseAuth.getInstance()
+        mFirestore = FirebaseFirestore.getInstance()
 
         keySecret = findViewById(R.id.keySecret_input)
         cardCheck = findViewById(R.id.card_check)
         btnRegisterKey = findViewById(R.id.registerKey_btn)
 
         btnRegisterKey.setOnClickListener {
-            val key_secret = keySecret.text.toString()
+            val keySecretText = keySecret.text.toString()
 
-            if (key_secret.length >= 6) {
-                Toast.makeText(this, "Cadastro realizado com sucesso!", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, HomeActivity::class.java)
-                startActivity(intent)
+            if (keySecretText.length >= 6) {
+                val currentUser = mAuth.currentUser
+                val userId = currentUser?.uid
+
+                if (userId != null) {
+                    // Salvar a senha secreta no Firestore
+                    mFirestore.collection("users").document(userId)
+                        .update("secretPassword", keySecretText)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Senha secreta cadastrada com sucesso!", Toast.LENGTH_SHORT).show()
+                            startActivity(Intent(this, HomeActivity::class.java))
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Erro ao cadastrar senha secreta: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    Toast.makeText(this, "Usuário não autenticado!", Toast.LENGTH_SHORT).show()
+                }
             } else {
-                Toast.makeText(this, "A senha está incorreta!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "A senha secreta deve ter no mínimo 6 caracteres!", Toast.LENGTH_SHORT).show()
             }
         }
 

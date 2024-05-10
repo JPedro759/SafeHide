@@ -14,17 +14,9 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(R.layout.profile_page)
 
         btnBack = findViewById(R.id.btn_back)
-
-        btnBack.setOnClickListener {
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
-        }
+        btnBack.setOnClickListener { startActivity(Intent(this, HomeActivity::class.java)) }
 
         btnEdit = findViewById(R.id.btn_edit)
-
-        btnEdit.setOnClickListener {
-            val intent = Intent(this, EditProfileActivity::class.java)
-            startActivity(intent)
-        }
+        btnEdit.setOnClickListener { startActivity(Intent(this, EditProfileActivity::class.java)) }
     }
 }
