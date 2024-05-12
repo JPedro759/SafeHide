@@ -30,9 +30,9 @@
         android:layout_marginTop="50dp"
         android:background="@drawable/buttonhide_style"
         android:fontFamily="@font/jetbrains_mono_bold"
-        android:text="Hide"
+        android:text="Escolher Arquivo"
         android:textColor="@color/cyan"
-        android:textSize="30dp"
+        android:textSize="20dp"
         android:textStyle="bold" />
 
     <fragment
@@ -52,8 +52,6 @@
         android:fontFamily="@font/jetbrains_mono_bold"
         android:textColor="@color/white"
         android:layout_gravity="center"
-        android:layout_marginTop="90dp"/>
-
-
+        android:layout_marginTop="120dp"/>
 
 </LinearLayout>
