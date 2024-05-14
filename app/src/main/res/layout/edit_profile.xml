@@ -75,7 +75,7 @@
             android:textSize="17sp" />
 
         <EditText
-            android:id="@+id/newKeySecret_input"
+            android:id="@+id/newPasswordSecret_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"

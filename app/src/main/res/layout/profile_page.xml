@@ -124,7 +124,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/keySecret_view"
+        android:id="@+id/secretPassword_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -145,7 +145,7 @@
         android:textStyle="bold" />
 
     <Button
-        android:id="@+id/login_btn"
+        android:id="@+id/logout_btn"
         android:layout_width="200dp"
         android:layout_height="70dp"
         android:layout_centerHorizontal="true"

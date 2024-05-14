@@ -52,8 +52,7 @@ class HomeActivity : AppCompatActivity(), ImageDeleteListener {
 
         buttonProfile = findViewById(R.id.btn_profile)
         buttonProfile.setOnClickListener {
-            val intent = Intent(this, ProfileActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, ProfileActivity::class.java))
         }
     }
 

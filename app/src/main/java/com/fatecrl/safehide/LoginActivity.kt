@@ -42,7 +42,7 @@ class LoginActivity : AppCompatActivity() {
                 mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(this, "Login bem-sucedido!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Login bem sucedido!", Toast.LENGTH_SHORT).show()
                             startActivity(Intent(this, HomeActivity::class.java))
                             finish() // Encerrar esta atividade para evitar que o usuário retorne a ela usando o botão de voltar
                         } else {
