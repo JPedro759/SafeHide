@@ -10,14 +10,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileActivity : AppCompatActivity() {
 
+    // Declaração das variáveis de entrada de texto e botões
     private lateinit var userNameView: TextView
     private lateinit var emailView: TextView
     private lateinit var secretPassword: TextView
-
     private lateinit var btnBack: Button
     private lateinit var btnEdit: Button
     private lateinit var btnLogout: Button
 
+    // Declaração das instâncias do Firebase Authentication e Firestore
     private lateinit var mAuth: FirebaseAuth
     private lateinit var database: FirebaseFirestore
 
@@ -25,9 +26,11 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.profile_page)
 
+        // Inicialização das instâncias do Firebase Authentication e Firestore
         mAuth = FirebaseAuth.getInstance()
         database = FirebaseFirestore.getInstance()
 
+        // Inicializa as variáveis de entrada de texto
         userNameView = findViewById(R.id.userNameView)
         emailView = findViewById(R.id.email_view)
         secretPassword = findViewById(R.id.secretPassword_view)
@@ -69,7 +72,6 @@ class ProfileActivity : AppCompatActivity() {
             // Deslogar o usuário do FirebaseAuth
             mAuth.signOut()
 
-            // Redirecionar o usuário para a tela de login
             startActivity(Intent(this, LoginActivity::class.java))
 
             // Limpar a pilha de atividades e evitar que o usuário volte para a tela de perfil

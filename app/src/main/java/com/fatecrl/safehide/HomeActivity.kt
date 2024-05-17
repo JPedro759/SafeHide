@@ -14,6 +14,7 @@ import com.fatecrl.safehide.fragments.FileListFragment
 
 class HomeActivity : AppCompatActivity(), ImageDeleteListener {
 
+    // Inicializa o launcher para selecionar imagens da galeria
     private val pickImages: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -26,6 +27,7 @@ class HomeActivity : AppCompatActivity(), ImageDeleteListener {
         }
     }
 
+    // Declaração de variáveis para os botões e o adaptador de arquivos
     lateinit var buttonHide: Button
     private val fileAdapter = FileAdapter()
 
@@ -35,14 +37,19 @@ class HomeActivity : AppCompatActivity(), ImageDeleteListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home)
 
+        // Inicializa o botão para obter imagens da galeria
         buttonHide = findViewById(R.id.buttonHide)
 
+        // Obtém a referência ao fragmento que lista os arquivos
         val fileListFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as FileListFragment
 
+        // Configura o adaptador para o fragmento de lista de arquivos
         fileListFragment.setAdapter(fileAdapter)
 
+        // Define o listener de deleção de imagens
         fileAdapter.setDeleteListener(this)
 
+        // Define a ação do botão para selecionar imagens da galeria
         buttonHide.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             intent.addCategory(Intent.CATEGORY_OPENABLE)
@@ -50,12 +57,14 @@ class HomeActivity : AppCompatActivity(), ImageDeleteListener {
             pickImages.launch(intent)
         }
 
+        // Inicializa o botão para acessar o perfil
         buttonProfile = findViewById(R.id.btn_profile)
         buttonProfile.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
     }
 
+    // Implementa a função de deleção de imagens da interface ImageDeleteListener
     override fun onDeleteImage(imageUri: Uri) {
         fileAdapter.removeImage(imageUri, applicationContext)
     }
