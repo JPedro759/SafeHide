@@ -12,6 +12,7 @@ class ProfileActivity : AppCompatActivity() {
 
     // Declaração das variáveis de entrada de texto e botões
     private lateinit var userNameView: TextView
+    private lateinit var userName: TextView
     private lateinit var emailView: TextView
     private lateinit var secretPassword: TextView
     private lateinit var btnBack: Button
@@ -32,6 +33,7 @@ class ProfileActivity : AppCompatActivity() {
 
         // Inicializa as variáveis de entrada de texto
         userNameView = findViewById(R.id.userNameView)
+        userName = findViewById(R.id.username_view)
         emailView = findViewById(R.id.email_view)
         secretPassword = findViewById(R.id.secretPassword_view)
 
@@ -42,16 +44,18 @@ class ProfileActivity : AppCompatActivity() {
         database.collection("users").document(userId!!).get()
             .addOnSuccessListener { document ->
                 if (document != null) {
-                    val userName = document.getString("username")
+                    val name = document.getString("username")
                     val email = document.getString("email")
                     val keySecret = document.getString("secretPassword")
 
                     // Exibir os dados do perfil do usuário na interface do usuário
-                    userNameView.text = userName
+                    userNameView.text = name
+                    userName.text = name
                     emailView.text = email
                     secretPassword.text = keySecret
                 } else {
                     userNameView.text = "Dados não encontrados"
+                    userName.text = "Dados não encontrados"
                     emailView.text = "Dados não encontrados"
                     secretPassword.text = "Dados não encontrados"
                 }
