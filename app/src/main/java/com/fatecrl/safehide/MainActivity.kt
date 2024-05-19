@@ -5,30 +5,29 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.fatecrl.safehide.databinding.ActivityMainBinding
+import com.fatecrl.safehide.databinding.RegisterBinding
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 
 class MainActivity : AppCompatActivity(){
 
-    lateinit var btnRegister: Button
-    lateinit var loginLink: TextView
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        FirebaseApp.initializeApp(/*context=*/ this)
-        val firebaseAppCheck = FirebaseAppCheck.getInstance()
-        firebaseAppCheck.installAppCheckProviderFactory(DebugAppCheckProviderFactory.getInstance())
-
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        btnRegister = findViewById(R.id.buttonRegister)
-        btnRegister.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
-        }
+        binding.apply {
+            btnRegister.setOnClickListener {
+                startActivity(Intent(this@MainActivity, RegisterActivity::class.java))
+            }
 
-        loginLink = findViewById(R.id.loginLink)
-        loginLink.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
+            loginLink.setOnClickListener {
+                startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+            }
         }
     }
 }

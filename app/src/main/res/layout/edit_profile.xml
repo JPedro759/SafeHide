@@ -6,7 +6,7 @@
     android:background="@drawable/register_login">
 
     <Button
-        android:id="@+id/btn_back"
+        android:id="@+id/btnBack"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_marginTop="10dp"
@@ -30,7 +30,7 @@
             android:textSize="30sp" />
 
         <EditText
-            android:id="@+id/newName_input"
+            android:id="@+id/newNameInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
@@ -45,7 +45,7 @@
             android:textSize="17sp" />
 
         <EditText
-            android:id="@+id/newEmail_input"
+            android:id="@+id/newEmailInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -60,7 +60,7 @@
             android:textSize="17sp" />
 
         <EditText
-            android:id="@+id/newPassword_input"
+            android:id="@+id/newPasswordInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -75,7 +75,7 @@
             android:textSize="17sp" />
 
         <EditText
-            android:id="@+id/newPasswordSecret_input"
+            android:id="@+id/newSecretPasswordInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -90,7 +90,7 @@
             android:textSize="17sp" />
 
         <Button
-            android:id="@+id/btn_edit"
+            android:id="@+id/btnEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"

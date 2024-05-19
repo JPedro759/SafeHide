@@ -5,83 +5,69 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.fatecrl.safehide.databinding.KeysecretPageBinding
+import com.fatecrl.safehide.services.FirebaseService.auth
+import com.fatecrl.safehide.services.FirebaseService.database
 
 class KeySecretPageActivity : AppCompatActivity() {
 
-    // Declaração dos componentes da interface do usuário
-    private lateinit var passwordSecret: EditText
-    private lateinit var cardCheck: CardView
-    private lateinit var btnRegisterKey: Button
-
-    // Declaração das instâncias do Firebase Authentication e Firestore
-    private lateinit var mAuth: FirebaseAuth
-    private lateinit var mFirestore: FirebaseFirestore
+    private lateinit var binding: KeysecretPageBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.keysecret_page)
+        binding = KeysecretPageBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Inicialização da instância do FirebaseAuth e Firestore
-        mAuth = FirebaseAuth.getInstance()
-        mFirestore = FirebaseFirestore.getInstance()
+        binding.apply {
+            btnRegisterKey.setOnClickListener {
+                val passwordSecretText = passwordSecretInput.text.toString()
 
-        // Inicialização dos componentes da interface do usuário
-        passwordSecret = findViewById(R.id.passwordSecret_input)
-        cardCheck = findViewById(R.id.card_check)
-        btnRegisterKey = findViewById(R.id.registerKey_btn)
-
-        // Listener para o botão de cadastro da senha secreta
-        btnRegisterKey.setOnClickListener {
-            val passwordSecretText = passwordSecret.text.toString()
-
-            // Verifica se a senha secreta tem no mínimo 6 caracteres
-            if (passwordSecretText.length >= 6) {
-                // Obtém o usuário atualmente autenticado
-                val currentUser = mAuth.currentUser
-                val userId = currentUser?.uid
-
-                if (userId != null) {
-                    // Salvar a senha secreta no Firestore
-                    mFirestore.collection("users").document(userId)
-                        .update("secretPassword", passwordSecretText)
-                        .addOnSuccessListener {
-                            Toast.makeText(this, "Senha secreta cadastrada com sucesso!", Toast.LENGTH_SHORT).show()
-                            startActivity(Intent(this, HomeActivity::class.java))
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "Erro ao cadastrar senha secreta: ${e.message}", Toast.LENGTH_LONG).show()
-                        }
-                } else {
-                    Toast.makeText(this, "Usuário não autenticado!", Toast.LENGTH_LONG).show()
-                }
-            } else {
-                Toast.makeText(this, "A senha secreta deve ter no mínimo 6 caracteres!", Toast.LENGTH_LONG).show()
+                if (passwordSecretText.length >= 6) saveSecretPassword(passwordSecretText)
+                else showMessage("A senha secreta deve ter no mínimo 6 caracteres!")
             }
+
+            passwordSecretInput.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+                override fun afterTextChanged(s: Editable?) {
+                    updateCardCheckColor(s.toString())
+                }
+            })
+        }
+    }
+
+    private fun saveSecretPassword(passwordSecretText: String) {
+        val user = auth.currentUser
+        if (user?.uid != null) {
+            database.collection("users").document(user.uid)
+                .update("secretPassword", passwordSecretText)
+                .addOnSuccessListener {
+                    showMessage("Senha secreta cadastrada com sucesso!")
+                    startActivity(Intent(this, HomeActivity::class.java))
+                }
+                .addOnFailureListener { e ->
+                    showMessage("Erro ao cadastrar senha secreta: ${e.message}")
+                }
+        } else {
+            showMessage("Usuário não autenticado!")
+        }
+    }
+
+    private fun updateCardCheckColor(passwordSecretText: String) {
+        val color = if (passwordSecretText.length >= 6) {
+            Color.parseColor("#8CFF5A") // Verde se tiver 6 ou mais caracteres
+        } else {
+            Color.parseColor("#DCDCDC") // Cor padrão caso contrário
         }
 
-        // Adiciona um TextWatcher ao campo de senha secreta para alterar a cor do cardCheck
-        passwordSecret.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        binding.cardCheck.setCardBackgroundColor(color)
+    }
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable?) {
-                val passwordSecretText = passwordSecret.text.toString()
-
-                // Muda a cor do cardCheck para verde se a senha secreta tiver 6 ou mais caracteres
-                if (passwordSecretText.length >= 6) {
-                    cardCheck.setCardBackgroundColor(Color.parseColor("#8CFF5A")) // Verde se tiver 6 ou mais caracteres
-                } else {
-                    cardCheck.setCardBackgroundColor(Color.parseColor("#DCDCDC")) // Cor padrão caso contrário
-                }
-            }
-        })
+    private fun showMessage(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 }

@@ -7,7 +7,7 @@
     android:background="@drawable/profile_background">
 
     <Button
-        android:id="@+id/btn_back"
+        android:id="@+id/btnBack"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:background="@drawable/arrowback"
@@ -27,7 +27,7 @@
         android:layout_marginTop="32dp"/>
 
     <Button
-        android:id="@+id/btn_edit"
+        android:id="@+id/btnEdit"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:background="@drawable/edit_icon"
@@ -77,7 +77,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/username_view"
+        android:id="@+id/nameView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -95,7 +95,7 @@
         app:srcCompat="@drawable/user_icon_profile" />
 
     <TextView
-        android:id="@+id/email_view"
+        android:id="@+id/emailView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -124,7 +124,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/secretPassword_view"
+        android:id="@+id/secretPasswordView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -145,7 +145,7 @@
         android:textStyle="bold" />
 
     <Button
-        android:id="@+id/logout_btn"
+        android:id="@+id/btnLogout"
         android:layout_width="200dp"
         android:layout_height="70dp"
         android:layout_centerHorizontal="true"

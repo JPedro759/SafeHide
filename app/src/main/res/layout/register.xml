@@ -6,7 +6,7 @@
     android:background="@drawable/register_login">
 
     <Button
-        android:id="@+id/btn_back"
+        android:id="@+id/btnBack"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_marginTop="-5dp"
@@ -90,7 +90,7 @@
             android:textSize="17sp" />
 
         <Button
-            android:id="@+id/register_btn"
+            android:id="@+id/btnRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
@@ -108,5 +108,4 @@
             android:text="@string/copyright"
             android:textColor="@color/black" />
     </LinearLayout>
-
 </RelativeLayout>

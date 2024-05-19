@@ -15,7 +15,7 @@
         android:src="@drawable/safehideicon" />
 
     <Button
-        android:id="@+id/btn_profile"
+        android:id="@+id/btnProfile"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginTop="-55dp"
@@ -23,7 +23,7 @@
         android:background="@drawable/user_icon"/>
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/buttonHide"
+        android:id="@+id/btnHide"
         android:layout_width="130dp"
         android:layout_height="130dp"
         android:layout_gravity="center"

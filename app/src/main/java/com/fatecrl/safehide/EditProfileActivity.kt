@@ -2,10 +2,11 @@ package com.fatecrl.safehide
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.fatecrl.safehide.databinding.EditProfileBinding
+import com.fatecrl.safehide.services.FirebaseService.auth
+import com.fatecrl.safehide.services.FirebaseService.database
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -13,127 +14,117 @@ import com.google.firebase.firestore.FirebaseFirestore
 class EditProfileActivity : AppCompatActivity() {
 
     // Declaração dos componentes da interface do usuário
-    private lateinit var newNameInput: EditText
-    private lateinit var newEmailInput: EditText
-    private lateinit var newPasswordInput: EditText
-    private lateinit var newPasswordSecretInput: EditText
-
-    lateinit var btnBack : Button
-    lateinit var btnEdit : Button
-
-    // Declaração da instância do FirebaseAuth para autenticação
-    private lateinit var mAuth: FirebaseAuth
-    // Declaração da instância do Firestore para armazenamento de dados
-    private lateinit var db: FirebaseFirestore
+    private lateinit var binding: EditProfileBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.edit_profile)
+        binding = EditProfileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Inicialização dos componentes da interface do usuário
-        newNameInput = findViewById(R.id.newName_input)
-        newEmailInput = findViewById(R.id.newEmail_input)
-        newPasswordInput = findViewById(R.id.newPassword_input)
-        newPasswordSecretInput = findViewById(R.id.newPasswordSecret_input)
-
-        // Inicialização das instâncias de autenticação e banco de dados
-        mAuth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance()
-
-        // Inicialização dos botões
-        btnBack = findViewById(R.id.btn_back)
-        btnEdit = findViewById(R.id.btn_edit)
-
-        // Listener para o botão de voltar
-        btnBack.setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
-
-        // Obtém o ID do usuário atualmente autenticado
-        val userId = mAuth.currentUser?.uid
-
-        // Verifica se o usuário está autenticado
-        if (userId != null) {
-            // Referência ao documento do usuário no Firestore
-            val userRef = db.collection("users").document(userId)
-
-            // Obtém os dados do usuário do Firestore
-            userRef.get().addOnSuccessListener { document ->
-                if (document.exists()) {
-                    // Obtém os dados do documento
-                    val name = document.getString("username")
-                    val email = document.getString("email")
-                    val password = document.getString("password")
-                    val secretPassword = document.getString("secretPassword")
-
-                    // Define os dados do usuário nos campos EditText
-                    newNameInput.setText(name)
-                    newEmailInput.setText(email)
-                    newPasswordInput.setText(password)
-                    newPasswordSecretInput.setText(secretPassword)
-                } else {
-                    // Mensagem de erro se o usuário não for encontrado
-                    Toast.makeText(this, "Usuário não encontrado", Toast.LENGTH_LONG).show()
-                }
-            }.addOnFailureListener { e ->
-                // Mensagem de erro em caso de falha ao obter os dados do usuário
-                Toast.makeText(this, "Erro ao obter dados do usuário: ${e.message}", Toast.LENGTH_LONG).show()
+        binding.apply {
+            // Listener para o botão de voltar
+            btnBack.setOnClickListener {
+                startActivity(
+                    Intent(this@EditProfileActivity, ProfileActivity::class.java)
+                )
             }
-        } else {
-            // Mensagem de erro se o usuário não estiver autenticado
-            Toast.makeText(this, "Usuário não autenticado", Toast.LENGTH_LONG).show()
-        }
 
-        // Listener para o botão de editar
-        btnEdit.setOnClickListener {
-            // Obtém os valores inseridos pelo usuário nos campos EditText
-            val newName = newNameInput.text.toString()
-            val newEmail = newEmailInput.text.toString().trim()
-            val newPassword = newPasswordInput.text.toString().trim()
-            val newPasswordSecret = newPasswordSecretInput.text.toString().trim()
+            // Obtém o ID do usuário atualmente autenticado
+            val userId = auth.currentUser?.uid
 
-            // Verifica se todos os campos estão preenchidos
-            if (newName.isNotEmpty() && newEmail.isNotEmpty() && newPassword.isNotEmpty() && newPasswordSecret.isNotEmpty()) {
-                // Verifica se a senha secreta tem pelo menos 6 caracteres
-                if (newPasswordSecret.length >= 6) {
+            userId?.let {
+                displayUserData(it)
+            } ?: run {
+                // Mensagem de erro se o usuário não estiver autenticado
+                showMessage("Usuário não autenticado")
+            }
+
+            // Listener para o botão de editar
+            btnEdit.setOnClickListener {
+                // Obtém os valores inseridos pelo usuário nos campos EditText
+                val newName = newNameInput.text.toString()
+                val newEmail = newEmailInput.text.toString().trim()
+                val newPassword = newPasswordInput.text.toString().trim()
+                val newSecretPassword = newSecretPasswordInput.text.toString().trim()
+
+                if (validateFields(newName, newEmail, newPassword, newSecretPassword)){
                     // Verifica novamente o ID do usuário atualmente autenticado
-                    val userId = mAuth.currentUser?.uid
+                    val userId = auth.currentUser?.uid
 
-                    if (userId != null) {
-                        // Referência ao documento do usuário no Firestore
-                        val userRef = db.collection("users").document(userId)
-                        // Mapa de atualizações
-                        val updates = mutableMapOf<String, Any>()
-
-                        // Atualiza os valores no mapa
-                        updates["username"] = newName
-                        updates["email"] = newEmail
-                        updates["password"] = newPassword
-                        updates["secretPassword"] = newPasswordSecret
-
-                        // Atualiza os dados do usuário no Firestore
-                        userRef.update(updates)
-                            .addOnSuccessListener {
-                                // Mensagem de sucesso e redirecionamento para a tela de perfil
-                                Toast.makeText(this, "Dados alterados com sucesso!", Toast.LENGTH_SHORT).show()
-                                val intent = Intent(this, ProfileActivity::class.java)
-                                startActivity(intent)
-                            }.addOnFailureListener { e ->
-                                // Mensagem de erro em caso de falha ao atualizar os dados
-                                Toast.makeText(this, "Erro ao atualizar dados: ${e.message}", Toast.LENGTH_LONG).show()
-                            }
-                    } else {
+                    userId?.let {
+                        editUser(it, newName, newEmail, newPassword, newSecretPassword)
+                    } ?: run {
                         // Mensagem de erro se o usuário não estiver autenticado
-                        Toast.makeText(this, "Usuário não autenticado", Toast.LENGTH_LONG).show()
+                        showMessage("Usuário não autenticado")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun displayUserData(userId: String) {
+        database.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    document.data?.let { data ->
+                        binding.apply {
+                            newNameInput.setText(data["username"].toString())
+                            newEmailInput.setText(data["email"].toString())
+                            newPasswordInput.setText(data["password"].toString())
+                            newSecretPasswordInput.setText(data["secretPassword"].toString())
+                        }
                     }
                 } else {
-                    // Mensagem de erro se a senha secreta tiver menos de 6 caracteres
-                    Toast.makeText(this, "A senha secreta deve ter 6 números!", Toast.LENGTH_LONG).show()
+                    showMessage("Usuário não encontrado")
                 }
-            } else {
-                // Mensagem de erro se algum campo não estiver preenchido
-                Toast.makeText(this, "Por favor, preencha todos os campos!", Toast.LENGTH_LONG).show()
             }
+            .addOnFailureListener { e ->
+                showMessage("Erro ao obter dados do usuário: ${e.message}")
+            }
+    }
+
+    private fun validateFields(newUserName: String, newEmail: String, newPassword: String, newSecretPassword: String): Boolean {
+        return when {
+            newUserName.isEmpty() && newEmail.isEmpty() && newPassword.isEmpty() && newSecretPassword.isEmpty() -> {
+                showMessage("Por favor, preencha todos os campos!")
+                false
+            }
+            newSecretPassword.length < 6 -> {
+                showMessage("A senha secreta deve ter 6 números!")
+                false
+            }
+            else -> true
         }
+    }
+
+    private fun editUser(userId: String, newUserName: String, newEmail: String, newPassword: String, newSecretPassword: String){
+        // Referência ao documento do usuário no Firestore
+        val userRef = database.collection("users").document(userId)
+
+        // Mapa de atualizações
+        val updates = mutableMapOf<String, Any>()
+
+        // Atualiza os valores no mapa
+        updates["username"] = newUserName
+        updates["email"] = newEmail
+        updates["password"] = newPassword
+        updates["secretPassword"] = newSecretPassword
+
+        // Atualiza os dados do usuário no Firestore
+        userRef.update(updates)
+            .addOnSuccessListener {
+                // Mensagem de sucesso e redirecionamento para a tela de perfil
+                Toast.makeText(this, "Dados alterados com sucesso!", Toast.LENGTH_SHORT).show()
+                startActivity(
+                    Intent(this@EditProfileActivity, ProfileActivity::class.java)
+                )
+            }.addOnFailureListener { e ->
+                // Mensagem de erro em caso de falha ao atualizar os dados
+                showMessage("Erro ao atualizar dados: ${e.message}")
+            }
+    }
+
+    private fun showMessage(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 }
