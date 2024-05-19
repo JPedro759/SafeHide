@@ -1,49 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/profile_background">
+    android:background="@drawable/profile_background"
+    tools:context=".ProfileActivity">
 
     <Button
         android:id="@+id/btnBack"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:background="@drawable/arrowback"
-        android:textSize="17sp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.071"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.042" />
 
     <TextView
-        android:layout_width="128dp"
-        android:layout_height="35dp"
+        android:id="@+id/profileTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="34dp"
         android:fontFamily="@font/jetbrains_mono_bold"
-        android:gravity="center"
         android:text="Perfil"
         android:textColor="@color/white_ice"
         android:textSize="25sp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="32dp"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnEdit"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:background="@drawable/edit_icon"
-        android:textSize="17sp"
-        android:layout_marginStart="355dp"
-        android:layout_marginTop="32dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.925"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.042" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageProfile"
         android:layout_width="125dp"
         android:layout_height="125dp"
-        android:layout_alignParentEnd="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        android:layout_marginEnd="143dp"
-        android:src="@drawable/user_profile" />
+        android:layout_marginTop="32dp"
+        android:src="@drawable/user_profile"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profileTitle" />
 
     <TextView
         android:id="@+id/userNameView"
@@ -53,107 +62,127 @@
         android:text="João Pedro"
         android:textColor="@color/black"
         android:textSize="25sp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="235dp"
-        />
-
-    <ImageView
-        android:id="@+id/profile_email"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="425dp"
-        app:srcCompat="@drawable/email_icon_profile" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="335dp"
-        android:layout_toEndOf="@+id/profile_name"
-        android:text="Nome"
-        android:textColor="@color/black"
-        android:textSize="20dp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/nameView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="368dp"
-        android:layout_toEndOf="@+id/profile_name"
-        android:text="João Pedro"
-        android:textSize="15sp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageProfile"
+        app:layout_constraintVertical_bias="0.03" />
 
     <ImageView
         android:id="@+id/profile_name"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="330dp"
-        app:srcCompat="@drawable/user_icon_profile" />
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:src="@drawable/user_icon_profile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userNameView" />
 
-    <TextView
-        android:id="@+id/emailView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="465dp"
-        android:layout_toEndOf="@+id/profile_email"
-        android:text="joaopedro@gmail.com"
-        android:textSize="15sp" />
+    <ImageView
+        android:id="@+id/profile_email"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:src="@drawable/email_icon_profile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profile_name" />
 
     <ImageView
         android:id="@+id/profile_key_secret"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="515dp"
-        app:srcCompat="@drawable/key_secret" />
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:src="@drawable/key_secret"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profile_email" />
 
     <TextView
+        android:id="@+id/secretPasswordLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="523dp"
-        android:layout_toEndOf="@+id/profile_key_secret"
+        android:layout_marginStart="8dp"
         android:text="Senha Secreta"
         android:textColor="@color/black"
         android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/profile_key_secret"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteY="500dp" />
 
     <TextView
         android:id="@+id/secretPasswordView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="553dp"
-        android:layout_toEndOf="@+id/profile_key_secret"
+        android:layout_marginStart="8dp"
         android:text="123456"
-        android:textSize="15sp" />
+        android:textSize="15sp"
+        app:layout_constraintStart_toEndOf="@+id/profile_key_secret"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteY="527dp" />
 
     <TextView
+        android:id="@+id/emailLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="435dp"
-        android:layout_toEndOf="@+id/profile_email"
+        android:layout_marginStart="8dp"
         android:text="Email"
         android:textColor="@color/black"
         android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/profile_email"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteY="407dp" />
+
+    <TextView
+        android:id="@+id/emailView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="joaopedro@gmail.com"
+        android:textSize="15sp"
+        app:layout_constraintStart_toEndOf="@+id/profile_email"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteY="434dp" />
+
+    <TextView
+        android:id="@+id/nameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Nome"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/profile_name"
+        tools:layout_editor_absoluteY="310dp"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/nameView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="João Pedro"
+        android:textSize="15sp"
+        app:layout_constraintStart_toEndOf="@+id/profile_name"
+        tools:layout_editor_absoluteY="337dp"
+        tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/btnLogout"
         android:layout_width="200dp"
         android:layout_height="70dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="670dp"
         android:background="@drawable/gradient_logout"
         android:fontFamily="@font/jetbrains_mono_bold"
         android:text="Sair da conta"
         android:textColor="@color/white"
-        android:textSize="17sp" />
-
-</RelativeLayout>
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.943" />
+</androidx.constraintlayout.widget.ConstraintLayout>

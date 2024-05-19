@@ -1,87 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/initial"
     android:orientation="vertical"
-    tools:context="MainActivity">
-
-    <TextView
-        android:id="@+id/textPresentation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textAlignment="center"
-        android:fontFamily="@font/jetbrains_mono_bold"
-        android:textColor="@color/white"
-        android:textSize="35sp"
-        android:text="Bem vindo ao"
-        android:layout_marginTop="60dp"
-        />
-    <TextView
-        android:id="@+id/textSafeHide"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textAlignment="center"
-        android:fontFamily="@font/jetbrains_mono_bold"
-        android:textColor="@color/green_lemon"
-        android:textSize="35sp"
-        android:text="SafeHide" />
+    tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/initialMsg"
         android:layout_width="290dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="20dp"
         android:fontFamily="@font/jetbrains_mono_semibold"
         android:text="O melhor app para manter seus arquivos seguros e protegidos contra furtos!"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="15sp" />
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textSafeHide"
+        app:layout_constraintVertical_bias="0.066" />
+
+    <TextView
+        android:id="@+id/textSafeHide"
+        android:layout_width="315dp"
+        android:layout_height="37dp"
+        android:layout_gravity="center"
+        android:fontFamily="@font/jetbrains_mono_bold"
+        android:text="SafeHide"
+        android:textAlignment="center"
+        android:textColor="@color/green_lemon"
+        android:textSize="35sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textPresentation" />
+
+    <TextView
+        android:id="@+id/textPresentation"
+        android:layout_width="315dp"
+        android:layout_height="43dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="64dp"
+        android:fontFamily="@font/jetbrains_mono_bold"
+        android:text="Bem vindo ao"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="35sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnRegister"
         android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="350dp"
-        android:fontFamily="@font/jetbrains_mono_bold"
-        android:textColor="@color/black"
-        android:textSize="15sp"
         android:background="@drawable/buttonradius"
-        android:text="Cadastre-se" />
+        android:fontFamily="@font/jetbrains_mono_bold"
+        android:text="Cadastre-se"
+        android:textColor="@color/black"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.757" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="59dp"
-        android:layout_marginTop="20dp"
-        android:orientation="horizontal">
+    <TextView
+        android:id="@+id/loginLink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="24dp"
+        android:clickable="true"
+        android:fontFamily="@font/jetbrains_mono_semibold"
+        android:text="@string/login"
+        android:textAlignment="textStart"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.07"
+        app:layout_constraintStart_toEndOf="@+id/alreadyAccount"
+        app:layout_constraintTop_toBottomOf="@+id/btnRegister" />
 
-        <TextView
-            android:id="@+id/alreadyAccount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/jetbrains_mono_semibold"
-            android:text="Já possui uma conta?"
-            android:layout_marginStart="80dp"
-            android:textAlignment="textStart"
-            android:textColor="@color/white"
-            android:textSize="15sp" />
+    <TextView
+        android:id="@+id/alreadyAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="76dp"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/jetbrains_mono_semibold"
+        android:text="Já possui uma conta?"
+        android:textAlignment="textStart"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnRegister" />
 
-        <TextView
-            android:id="@+id/loginLink"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:fontFamily="@font/jetbrains_mono_semibold"
-            android:text="@string/login"
-            android:textAlignment="textStart"
-            android:textSize="15sp"
-            android:clickable="true"
-            />
-    </LinearLayout>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

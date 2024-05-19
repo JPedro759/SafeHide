@@ -29,6 +29,7 @@ class LoginActivity : AppCompatActivity() {
                 val user = auth.currentUser
 
                 // Logs para depuração
+                Log.d("TAG", "Firebase Auth: $auth")
                 Log.d("TAG", "User ID: ${user?.uid}")
                 Log.d("TAG", "User: $user")
 
@@ -37,6 +38,8 @@ class LoginActivity : AppCompatActivity() {
                     if (validateFields(email, password)){
                         loginUser(email, password)
                     }
+                } ?: run {
+                    Toast.makeText(this@LoginActivity, "Usuário não autenticado!", Toast.LENGTH_LONG).show()
                 }
             }
 
