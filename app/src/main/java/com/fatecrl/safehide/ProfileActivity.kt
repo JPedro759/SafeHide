@@ -2,6 +2,7 @@ package com.fatecrl.safehide
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.fatecrl.safehide.databinding.ProfilePageBinding
 import com.fatecrl.safehide.services.FirebaseService.auth
@@ -24,15 +25,12 @@ class ProfileActivity : AppCompatActivity() {
 
             userId?.let {         // Se userId não for nulo, executa o bloco let
                 loadUserProfile(it)      // Passa o valor de userId (referenciado como it) para loadUserProfile
-            } ?: run {// it é uma maneira conveniente de se referir ao único argumento de uma lambda quando o contexto é claro
-                displayUserNotFound()   // Se userId for nulo, executa o bloco run e a função displayUserNotFound é chamada
             }
 
             setupListeners()
         }
     }
-
-    private fun loadUserProfile(userId: String){
+    private fun loadUserProfile(userId: String) {
         // Recuperar os dados do perfil do usuário do Cloud Firestore
         database.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
@@ -43,24 +41,16 @@ class ProfileActivity : AppCompatActivity() {
 
                     // Exibir os dados do perfil do usuário na interface do usuário
                     binding.apply {
-                        userNameView.text = name
-                        nameView.text = name
-                        nameView.text = email
-                        secretPasswordView.text = keySecret
+                        userNameView.text = name ?: "Nome não encontrado"
+                        nameView.text = name ?: "Nome não encontrado"
+                        emailView.text = email ?: "Email não encontrado"
+                        secretPasswordView.text = keySecret ?: "Senha secreta não encontrada"
                     }
-                } else {
-                    displayUserNotFound()
                 }
             }
-    }
-
-    private fun displayUserNotFound() {
-        binding.apply {
-            userNameView.text = "Dados não encontrados"
-            nameView.text = "Dados não encontrados"
-            emailView.text = "Dados não encontrados"
-            secretPasswordView.text = "Dados não encontrados"
-        }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Erro ao carregar perfil: ${e.message}", Toast.LENGTH_LONG).show()
+            }
     }
 
     private fun setupListeners() {

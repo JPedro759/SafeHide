@@ -102,13 +102,12 @@ class EditProfileActivity : AppCompatActivity() {
         val userRef = database.collection("users").document(userId)
 
         // Mapa de atualizações
-        val updates = mutableMapOf<String, Any>()
-
-        // Atualiza os valores no mapa
-        updates["username"] = newUserName
-        updates["email"] = newEmail
-        updates["password"] = newPassword
-        updates["secretPassword"] = newSecretPassword
+        val updates = mapOf(
+            "username" to newUserName,
+            "email" to newEmail,
+            "password" to newPassword,
+            "secretPassword" to newSecretPassword
+        )
 
         // Atualiza os dados do usuário no Firestore
         userRef.update(updates)
