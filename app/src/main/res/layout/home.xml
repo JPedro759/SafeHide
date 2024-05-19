@@ -1,57 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/home"
-    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <ImageView
+        android:id="@+id/imageView"
         android:layout_width="75dp"
         android:layout_height="65dp"
         android:layout_marginTop="30dp"
-        android:layout_marginStart="168dp"
-        android:src="@drawable/safehideicon" />
+        android:src="@drawable/safehideicon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnProfile"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginTop="-55dp"
-        android:layout_marginStart="340dp"
-        android:background="@drawable/user_icon"/>
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/user_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnHide"
         android:layout_width="130dp"
         android:layout_height="130dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="36dp"
         android:background="@drawable/buttonhide_style"
         android:fontFamily="@font/jetbrains_mono_bold"
         android:text="Escolher Arquivo"
         android:textColor="@color/cyan"
         android:textSize="20dp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
     <fragment
         android:id="@+id/fragmentContainerView"
         android:name="com.fatecrl.safehide.fragments.FileListFragment"
-        android:layout_width="340dp"
+        android:layout_width="0dp"
         android:layout_height="345dp"
-        android:layout_gravity="center"
         android:layout_marginTop="30dp"
-        tools:layout="@layout/fragment_file_list" />
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        tools:layout="@layout/fragment_file_list"
+        app:layout_constraintTop_toBottomOf="@+id/btnHide"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"/>
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/copyright"
+        android:layout_marginTop="20dp"
         android:fontFamily="@font/jetbrains_mono_bold"
+        android:text="@string/copyright"
         android:textColor="@color/white"
-        android:layout_gravity="center"
-        android:layout_marginTop="120dp"/>
-
-</LinearLayout>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragmentContainerView"
+        app:layout_constraintVertical_bias="0.7" />
+</androidx.constraintlayout.widget.ConstraintLayout>
