@@ -19,11 +19,15 @@ class MainActivity : AppCompatActivity(){
 
         binding.apply {
             btnRegister.setOnClickListener {
-                startActivity(Intent(this@MainActivity, RegisterActivity::class.java))
+                startActivity(
+                    Intent(this@MainActivity, RegisterActivity::class.java)
+                )
             }
 
             loginLink.setOnClickListener {
-                startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                startActivity(
+                    Intent(this@MainActivity, LoginActivity::class.java)
+                )
             }
         }
     }
