@@ -6,4 +6,5 @@
     <string name="forgotPassword"><a href="">Esqueceu a senha?</a></string>
     <string name="copyright">© 2024 SafeHide. All rights reserved.</string>
     <string name="key_msg">A senha secreta servirá para ativar a criptografia dos arquivos na pasta segura quando for digitada.</string>
+    <string name="forgotPassword_message">Forneça o e-mail da conta que deseja redefinir sua senha!</string>
 </resources>

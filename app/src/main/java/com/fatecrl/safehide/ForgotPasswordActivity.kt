@@ -6,7 +6,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.fatecrl.safehide.databinding.ForgotPasswordBinding
 import com.fatecrl.safehide.services.FirebaseService.auth
-import com.fatecrl.safehide.services.FirebaseService.database
 
 class ForgotPasswordActivity : AppCompatActivity() {
 
@@ -19,24 +18,12 @@ class ForgotPasswordActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.apply {
-            // Listener para o botão de alterar senha
+            // Listener para o botão de enviar email de redefinição de senha
             btnChangePassword.setOnClickListener {
-                val newPassword = binding.newPasswordInput.text.toString()
-                val confirmPassword = binding.confirmPasswordInput.text.toString()
+                val email = binding.emailInput.text.toString()
 
-                if (newPassword.isNotEmpty() && confirmPassword.isNotEmpty()) {
-                    if (newPassword == confirmPassword) {
-                        val userId = auth.currentUser?.uid
-
-                        userId?.let {
-                            updatePassword(it, newPassword)
-                        } ?: showMessage("ID do usuário é nulo!")
-                    } else {
-                        showMessage("As senhas não coincidem!")
-                    }
-                } else {
-                    showMessage("Por favor, preencha todos os campos!")
-                }
+                if (email.isNotEmpty()) sendPasswordResetEmail(email)
+                else showMessage("Por favor, preencha o campo de email!")
             }
 
             // Listener para o botão de voltar
@@ -48,16 +35,17 @@ class ForgotPasswordActivity : AppCompatActivity() {
         }
     }
 
-    private fun updatePassword(userId: String, newPassword: String) {
-        database.collection("users").document(userId).update("password", newPassword)
-            .addOnSuccessListener {
-                showMessage("Senha trocada com sucesso!")
-                startActivity(
-                    Intent(this@ForgotPasswordActivity, LoginActivity::class.java)
-                )
-            }
-            .addOnFailureListener { e ->
-                showMessage("Falha ao trocar a senha: ${e.message}")
+    private fun sendPasswordResetEmail(email: String) {
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    showMessage("Email de redefinição de senha enviado!")
+                    startActivity(
+                        Intent(this@ForgotPasswordActivity, LoginActivity::class.java)
+                    )
+                } else {
+                    showMessage("Falha ao enviar email de redefinição de senha: ${task.exception?.message}")
+                }
             }
     }
 

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.fatecrl.safehide.databinding.ProfilePageBinding
+import com.fatecrl.safehide.model.User
 import com.fatecrl.safehide.services.FirebaseService.auth
 import com.fatecrl.safehide.services.FirebaseService.database
 
@@ -31,21 +32,30 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
     private fun loadUserProfile(userId: String) {
-        // Recuperar os dados do perfil do usuário do Cloud Firestore
-        database.collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                if (document != null) {
-                    val name = document.getString("username")
-                    val email = document.getString("email")
-                    val keySecret = document.getString("secretPassword")
+        // Referência ao nó do usuário específico no Realtime Database
+        val userRef = database.reference.child("users").child(userId)
 
-                    // Exibir os dados do perfil do usuário na interface do usuário
-                    binding.apply {
-                        userNameView.text = name ?: "Nome não encontrado"
-                        nameView.text = name ?: "Nome não encontrado"
-                        emailView.text = email ?: "Email não encontrado"
-                        secretPasswordView.text = keySecret ?: "Senha secreta não encontrada"
+        userRef.get()
+            .addOnSuccessListener { dataSnapshot ->
+                if (dataSnapshot.exists()) {
+                    // Convertendo o DataSnapshot para o objeto User
+                    val user = dataSnapshot.getValue(User::class.java)
+
+                    user?.let {
+                        val name = it.username
+                        val email = it.email
+                        val keySecret = it.secretPassword
+
+                        // Exibir os dados do perfil do usuário na interface do usuário
+                        binding.apply {
+                            userNameView.text = name
+                            nameView.text = name
+                            emailView.text = email
+                            secretPasswordView.text = keySecret
+                        }
                     }
+                } else {
+                    Toast.makeText(this, "Usuário não encontrado!", Toast.LENGTH_LONG).show()
                 }
             }
             .addOnFailureListener { e ->
@@ -56,18 +66,24 @@ class ProfileActivity : AppCompatActivity() {
     private fun setupListeners() {
         binding.apply {
             btnBack.setOnClickListener {
-                startActivity(Intent(this@ProfileActivity, HomeActivity::class.java))
+                startActivity(
+                    Intent(this@ProfileActivity, HomeActivity::class.java)
+                )
             }
 
             btnEdit.setOnClickListener {
-                startActivity(Intent(this@ProfileActivity, EditProfileActivity::class.java))
+                startActivity(
+                    Intent(this@ProfileActivity, EditProfileActivity::class.java)
+                )
             }
 
             btnLogout.setOnClickListener {
                 // Deslogar o usuário do FirebaseAuth
                 auth.signOut()
 
-                startActivity(Intent(this@ProfileActivity, LoginActivity::class.java))
+                startActivity(
+                    Intent(this@ProfileActivity, LoginActivity::class.java)
+                )
 
                 // Limpar a pilha de atividades e evitar que o usuário volte para a tela de perfil
                 finishAffinity()

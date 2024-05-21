@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.fatecrl.safehide.databinding.KeysecretPageBinding
 import com.fatecrl.safehide.services.FirebaseService.auth
 import com.fatecrl.safehide.services.FirebaseService.database
+import com.google.firebase.database.DatabaseReference
 
 class KeySecretPageActivity : AppCompatActivity() {
 
@@ -42,9 +43,11 @@ class KeySecretPageActivity : AppCompatActivity() {
 
     private fun saveSecretPassword(passwordSecretText: String) {
         val user = auth.currentUser
-        if (user?.uid != null) {
-            database.collection("users").document(user.uid)
-                .update("secretPassword", passwordSecretText)
+
+        user?.uid.let {
+            val userRef = database.reference.child("users").child(user!!.uid)
+
+            userRef.child("secretPassword").setValue(passwordSecretText)
                 .addOnSuccessListener {
                     showMessage("Senha secreta cadastrada com sucesso!")
                     startActivity(Intent(this, HomeActivity::class.java))
@@ -52,8 +55,6 @@ class KeySecretPageActivity : AppCompatActivity() {
                 .addOnFailureListener { e ->
                     showMessage("Erro ao cadastrar senha secreta: ${e.message}")
                 }
-        } else {
-            showMessage("Usuário não autenticado!")
         }
     }
 
