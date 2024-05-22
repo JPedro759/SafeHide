@@ -42,15 +42,11 @@ class EditProfileActivity : AppCompatActivity() {
             // Listener para o botão de editar
             btnEdit.setOnClickListener {
                 val newName = newNameInput.text.toString()
-                val newEmail = newEmailInput.text.toString().trim()
-                val newPassword = newPasswordInput.text.toString().trim()
                 val newSecretPassword = newSecretPasswordInput.text.toString().trim()
 
-                if (validateFields(newName, newEmail, newPassword, newSecretPassword)){
-                    val userId = auth.currentUser?.uid
-
+                if (newSecretPassword.length >= 6){
                     userId?.let {
-                        editUser(it, newName, newEmail, newPassword, newSecretPassword)
+                        editUser(it, newName, newSecretPassword)
                     } ?: run {
                         showMessage("Usuário não autenticado")
                     }
@@ -70,8 +66,6 @@ class EditProfileActivity : AppCompatActivity() {
                     user?.let {
                         binding.apply {
                             newNameInput.setText(it.username)
-                            newEmailInput.setText(it.email)
-                            newPasswordInput.setText(it.secretPassword) // Assumindo que você quer mostrar a senha secreta aqui
                             newSecretPasswordInput.setText(it.secretPassword)
                         }
                     }
@@ -84,21 +78,7 @@ class EditProfileActivity : AppCompatActivity() {
             }
     }
 
-    private fun validateFields(newUserName: String, newEmail: String, newPassword: String, newSecretPassword: String): Boolean {
-        return when {
-            newUserName.isEmpty() || newEmail.isEmpty() || newPassword.isEmpty() || newSecretPassword.isEmpty() -> {
-                showMessage("Por favor, preencha todos os campos!")
-                false
-            }
-            newSecretPassword.length < 6 -> {
-                showMessage("A senha secreta deve ter 6 números!")
-                false
-            }
-            else -> true
-        }
-    }
-
-    private fun editUser(userId: String, newUserName: String, newEmail: String, newPassword: String, newSecretPassword: String){
+    private fun editUser(userId: String, newUserName: String, newSecretPassword: String){
         val updates = mapOf(
             "username" to newUserName,
             "secretPassword" to newSecretPassword

@@ -25,8 +25,20 @@ class LoginActivity : AppCompatActivity() {
                 val email = emailInput.text.toString().trim()
                 val password = passwordInput.text.toString().trim()
 
-                if (validateFields(email, password))
-                    loginUser(email, password)
+                if (validateFields(email, password)){
+                    val verification = auth.currentUser?.isEmailVerified
+
+                    if(verification == true){
+                        loginUser(email, password)
+                    } else {
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "Por favor, verifique seu email!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                }
             }
 
             // Link de recuperação de senha

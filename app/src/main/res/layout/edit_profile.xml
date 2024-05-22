@@ -31,16 +31,15 @@
         android:textSize="30sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.347" />
+        app:layout_constraintVertical_bias="0.366" />
 
     <EditText
         android:id="@+id/newNameInput"
         android:layout_width="350dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="36dp"
         android:background="@drawable/rounded_corner"
         android:drawableStart="@drawable/user_icon"
         android:drawablePadding="7dp"
@@ -51,7 +50,7 @@
         android:textColorHint="@color/black"
         android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.488"
+        app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView11" />
 
@@ -68,32 +67,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/newSecretPasswordInput"
-        app:layout_constraintVertical_bias="0.33" />
-
-    <EditText
-        android:id="@+id/newPasswordInput"
-        android:layout_width="350dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/rounded_corner"
-        android:drawableStart="@drawable/password_icon"
-        android:drawablePadding="7dp"
-        android:hint="Nova senha"
-        android:inputType="textPassword"
-        android:padding="15dp"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black"
-        android:textSize="17sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.488"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/newEmailInput" />
+        app:layout_constraintVertical_bias="0.243" />
 
     <EditText
         android:id="@+id/newSecretPasswordInput"
         android:layout_width="350dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:background="@drawable/rounded_corner"
         android:drawableStart="@drawable/key_secret_edit"
         android:drawablePadding="7dp"
@@ -104,26 +84,7 @@
         android:textColorHint="@color/black"
         android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.488"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/newPasswordInput" />
-
-    <EditText
-        android:id="@+id/newEmailInput"
-        android:layout_width="350dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/rounded_corner"
-        android:drawableStart="@drawable/email_icon"
-        android:drawablePadding="7dp"
-        android:hint="Novo email"
-        android:inputType="textEmailAddress"
-        android:padding="15dp"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black"
-        android:textSize="17sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.488"
+        app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/newNameInput" />
 
