@@ -32,14 +32,14 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnHide"
-        android:layout_width="130dp"
-        android:layout_height="130dp"
+        android:layout_width="135dp"
+        android:layout_height="135dp"
         android:layout_marginTop="36dp"
         android:background="@drawable/buttonhide_style"
         android:fontFamily="@font/jetbrains_mono_bold"
         android:text="Escolher Arquivo"
         android:textColor="@color/cyan"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -74,4 +74,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragmentContainerView"
         app:layout_constraintVertical_bias="0.803" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
