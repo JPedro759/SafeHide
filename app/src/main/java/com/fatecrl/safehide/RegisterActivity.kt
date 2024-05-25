@@ -2,7 +2,6 @@ package com.fatecrl.safehide
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.fatecrl.safehide.databinding.RegisterBinding
@@ -66,13 +65,14 @@ class RegisterActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
 
-                    // Logs para depuração
-                    Log.d("TAG", "User ID: ${user?.uid}")
-                    Log.d("TAG", "User: $user")
-
                     val userId = user?.uid ?: return@addOnCompleteListener
 
-                    saveUserData(userId, username, email)
+                    user.sendEmailVerification().addOnSuccessListener {
+                        Toast.makeText(this, "Por favor, verifique seu email!", Toast.LENGTH_LONG).show()
+                        saveUserData(userId, username, email)
+                    }.addOnFailureListener {
+                        Toast.makeText(this, it.toString(), Toast.LENGTH_LONG).show()
+                    }
                 } else {
                     Toast.makeText(this, "Falha ao cadastrar usuário: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
