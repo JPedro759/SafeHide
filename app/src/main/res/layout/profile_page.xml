@@ -23,14 +23,15 @@
         android:id="@+id/profileTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
         android:fontFamily="@font/jetbrains_mono_bold"
         android:text="Perfil"
         android:textColor="@color/white_ice"
         android:textSize="25sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.043" />
 
     <Button
         android:id="@+id/btnEdit"
@@ -48,11 +49,12 @@
         android:id="@+id/imageProfile"
         android:layout_width="125dp"
         android:layout_height="125dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="128dp"
         android:src="@drawable/user_profile"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profileTitle" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/userNameView"
@@ -72,14 +74,12 @@
         android:id="@+id/profile_email"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:layout_marginTop="24dp"
         android:src="@drawable/email_icon_profile"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/profile_key_secret"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.089"
+        app:layout_constraintHorizontal_bias="0.087"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_name"
-        app:layout_constraintVertical_bias="0.003" />
+        app:layout_constraintTop_toBottomOf="@+id/profile_name" />
 
     <TextView
         android:id="@+id/nameLabel"
@@ -93,35 +93,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/profile_name"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.419"
-        tools:ignore="MissingConstraints" />
-
-    <TextView
-        android:id="@+id/emailLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="Email"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/profile_email"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.547"
-        tools:ignore="MissingConstraints" />
-
-    <TextView
-        android:id="@+id/secretPasswordView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="null"
-        android:textSize="15sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/profile_key_secret"
-        app:layout_constraintTop_toBottomOf="@+id/secretPasswordLabel"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintVertical_bias="0.421"
         tools:ignore="MissingConstraints" />
 
     <TextView
@@ -138,6 +110,21 @@
         tools:ignore="MissingConstraints" />
 
     <TextView
+        android:id="@+id/emailLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Email"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/profile_email"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.527"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
         android:id="@+id/emailView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -147,7 +134,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/profile_email"
         app:layout_constraintTop_toBottomOf="@+id/emailLabel"
-        app:layout_constraintVertical_bias="0.003"
+        app:layout_constraintVertical_bias="0.0"
         tools:ignore="MissingConstraints" />
 
     <TextView
@@ -162,7 +149,20 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/profile_key_secret"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.677"
+        app:layout_constraintVertical_bias="0.63"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/secretPasswordView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="null"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/profile_key_secret"
+        app:layout_constraintTop_toBottomOf="@+id/secretPasswordLabel"
+        app:layout_constraintVertical_bias="0.0"
         tools:ignore="MissingConstraints" />
 
     <ImageView
@@ -181,14 +181,13 @@
         android:id="@+id/profile_key_secret"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:layout_marginTop="20dp"
         android:src="@drawable/key_secret"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.089"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_email"
-        app:layout_constraintVertical_bias="0.009" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.649" />
 
     <Button
         android:id="@+id/btnDownloadMedia"
@@ -202,10 +201,9 @@
         android:textSize="17sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.815" />
+        app:layout_constraintVertical_bias="0.797" />
 
     <Button
         android:id="@+id/btnLogout"
@@ -218,9 +216,9 @@
         android:textSize="17sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.962" />
+        app:layout_constraintVertical_bias="0.927" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

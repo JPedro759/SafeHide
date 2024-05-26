@@ -27,9 +27,9 @@ class RegisterActivity : AppCompatActivity() {
             btnRegister.setOnClickListener {
                 // Obtém os valores dos campos de entrada de texto
                 val username = binding.usernameInput.text.toString()
-                val email = binding.emailInput.text.toString()
-                val password = binding.passwordInput.text.toString()
-                val repeatPassword = binding.repeatPasswordInput.text.toString()
+                val email = binding.emailInput.text.toString().trim()
+                val password = binding.passwordInput.text.toString().trim()
+                val repeatPassword = binding.repeatPasswordInput.text.toString().trim()
 
                 if (validateFields(username, email, password, repeatPassword)) {
                     registerAccount(username, email, password)
@@ -46,13 +46,19 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun validateFields(username: String, email: String, password: String, repeatPassword: String): Boolean {
+        val emailRegex = """^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$""".toRegex()
+
         return when {
-            username.isEmpty() && email.isEmpty() && password.isEmpty() && repeatPassword.isEmpty() -> {
+            username.isEmpty() || email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty() -> {
                 Toast.makeText(this, "Por favor, preencha todos os campos!", Toast.LENGTH_LONG).show()
                 false
             }
             password != repeatPassword -> {
                 Toast.makeText(this, "As senhas não coincidem!", Toast.LENGTH_LONG).show()
+                false
+            }
+            !emailRegex.matches(email) -> {
+                Toast.makeText(this, "Email inválido!", Toast.LENGTH_LONG).show()
                 false
             }
             else -> true
@@ -74,7 +80,11 @@ class RegisterActivity : AppCompatActivity() {
                         Toast.makeText(this, it.toString(), Toast.LENGTH_LONG).show()
                     }
                 } else {
-                    Toast.makeText(this, "Falha ao cadastrar usuário: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this,
+                        "Falha ao cadastrar usuário: ${task.exception?.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
     }

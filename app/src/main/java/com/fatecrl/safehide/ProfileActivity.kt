@@ -63,8 +63,18 @@ class ProfileActivity : AppCompatActivity() {
             }
     }
 
+    // Função de baixar os arquivos no dispositivo
+    private fun downloadMedias() {
+        decryptFiles()
+    }
+
+    // Função que descriptografar os arquivos
+    private fun decryptFiles() {
+
+    }
+
     private fun setupListeners() {
-        binding.apply {
+        binding.apply{
             btnBack.setOnClickListener {
                 startActivity(
                     Intent(this@ProfileActivity, HomeActivity::class.java)
@@ -77,8 +87,12 @@ class ProfileActivity : AppCompatActivity() {
                 )
             }
 
+            btnDownloadMedia.setOnClickListener {
+                downloadMedias()
+            }
+
             btnLogout.setOnClickListener {
-                // Deslogar o usuário do FirebaseAuth
+                // Deslogar o usuário do FirebasAuth
                 auth.signOut()
 
                 startActivity(

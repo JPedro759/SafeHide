@@ -2,6 +2,7 @@ package com.fatecrl.safehide
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.fatecrl.safehide.databinding.LoginBinding
@@ -25,18 +26,7 @@ class LoginActivity : AppCompatActivity() {
                 val password = passwordInput.text.toString().trim()
 
                 if (validateFields(email, password)){
-                    val verification = auth.currentUser?.isEmailVerified
-
-                    if(verification == true){
-                        loginUser(email, password)
-                    } else {
-                        Toast.makeText(
-                            this@LoginActivity,
-                            "Por favor, verifique seu email!",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-
+                    loginUser(email, password)
                 }
             }
 
@@ -58,12 +48,8 @@ class LoginActivity : AppCompatActivity() {
 
     private fun validateFields(email: String, password: String): Boolean {
         return when {
-            email.isEmpty() -> {
-                Toast.makeText(this, "Por favor, insira seu email!", Toast.LENGTH_LONG).show()
-                false
-            }
-            password.isEmpty() -> {
-                Toast.makeText(this, "Por favor, insira sua senha!", Toast.LENGTH_LONG).show()
+            email.isEmpty() || password.isEmpty() -> {
+                Toast.makeText(this, "Por favor, todos os campos!", Toast.LENGTH_LONG).show()
                 false
             }
             else -> true
@@ -76,10 +62,15 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Login bem sucedido
-                    Toast.makeText(this, "Login bem sucedido!", Toast.LENGTH_SHORT).show()
+                    val user = auth.currentUser
 
-                    startActivity(Intent(this, HomeActivity::class.java))
-                    finish() // Encerrar esta atividade para evitar que o usuário retorne a ela usando o botão de voltar
+                    if (user != null && user.isEmailVerified) {
+                        Toast.makeText(this, "Login bem sucedido!", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, HomeActivity::class.java))
+                        finish() // Encerrar esta atividade para evitar que o usuário retorne a ela usando o botão de voltar
+                    } else {
+                        Toast.makeText(this, "Por favor, verifique seu email!", Toast.LENGTH_LONG).show()
+                    }
                 } else {
                     // Verificar o tipo de erro retornado pela task
                     val errorMessage = when (task.exception) {

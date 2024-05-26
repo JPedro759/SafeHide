@@ -80,6 +80,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="36dp"
         android:clickable="true"
+        android:focusable="true"
         android:fontFamily="@font/jetbrains_mono_semibold"
         android:text="@string/forgotPassword"
         android:textSize="15sp"

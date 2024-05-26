@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.fatecrl.safehide.databinding.KeysecretPageBinding
 import com.fatecrl.safehide.services.FirebaseService.auth
 import com.fatecrl.safehide.services.FirebaseService.database
-import com.google.firebase.database.DatabaseReference
 
 class KeySecretPageActivity : AppCompatActivity() {
 
