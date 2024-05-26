@@ -63,12 +63,13 @@ class ProfileActivity : AppCompatActivity() {
             }
     }
 
-    // Função de baixar os arquivos no dispositivo
+    // Função para iniciar o download os arquivos no dispositivo
     private fun downloadMedias() {
+        // Chama a função para descriptografar os arquivos após o download
         decryptFiles()
     }
 
-    // Função que descriptografar os arquivos
+    // Função para descriptografar arquivos baixados
     private fun decryptFiles() {
 
     }
