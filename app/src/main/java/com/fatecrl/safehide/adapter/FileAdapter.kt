@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,58 +15,95 @@ import com.fatecrl.safehide.R
 import com.google.android.material.snackbar.Snackbar
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.security.MessageDigest
 
-// Interface para ouvir eventos de deleção de imagem
-interface ImageDeleteListener {
-    fun onDeleteImage(imageUri: Uri)
+// Interface para ouvir eventos de deleção de arquivo
+interface FileDeleteListener {
+    fun onDeleteFile(fileUri: Uri)
 }
 
-// Adaptador para gerenciar uma lista de arquivos (imagens) no RecyclerView
-class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
+// Adaptador para gerenciar uma lista de arquivos no RecyclerView
+class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
 
-    // Lista de URIs das imagens
+    // Lista de URIs dos arquivos
     private val fileList = mutableListOf<Uri>()
 
-    // Listener para eventos de deleção de imagem
-    private var deleteListener: ImageDeleteListener? = null
+    // Listener para eventos de deleção de arquivo
+    private var deleteListener: FileDeleteListener? = null
 
     // Referência ao item atual da View
     private var currentItemView: View? = null
 
-    // Cria uma nova ViewHolder para uma imagem
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
+    // Cria uma nova ViewHolder para um arquivo
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_list, parent, false)
-        return ImageViewHolder(view)
+        return FileViewHolder(view)
     }
 
-    // Vincula uma imagem ao ViewHolder
-    override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
+    // Vincula um arquivo ao ViewHolder
+    override fun onBindViewHolder(holder: FileViewHolder, position: Int) {
         if (position in 0 until fileList.size) {
-            val imageUri = fileList[position]
-            holder.imageView.setImageURI(imageUri)
+            val fileUri = fileList[position]
+
+            // Exibir a imagem do arquivo
+            holder.imageView.setImageURI(fileUri)
+
+            // Exibir o nome do arquivo
+            val fileName = getFileNameFromUri(fileUri, holder.itemView.context)
+            holder.fileName.text = fileName
+
+            // Exibir o tamanho do arquivo
+            val fileSize = getFileSize(fileUri, holder.itemView.context)
+            holder.fileSize.text = fileSize
 
             holder.buttonDelete.setOnClickListener {
-                Log.d(imageUri.toString(), "Uri: $imageUri")
-                Log.d(imageUri.toString(), "Uri List: ${fileList}")
-
                 // Chama o listener de deleção
-                deleteListener?.onDeleteImage(imageUri)
+                deleteListener?.onDeleteFile(fileUri)
 
                 // Define o item atual
                 currentItemView = holder.itemView
-                showImageDeletedMessage("Imagem removida da lista!")
+                showFileDeletedMessage("Arquivo removido da lista!")
             }
         }
     }
 
-    // Mostra uma mensagem ao usuário sobre a deleção de uma imagem
-    private fun showImageDeletedMessage(message: String) {
+    // Método para obter o nome do arquivo a partir da Uri
+    private fun getFileNameFromUri(uri: Uri, context: Context): String {
+        val cursor = context.contentResolver.query(uri, null, null, null, null)
+
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val displayNameIndex = it.getColumnIndexOrThrow("_display_name")
+                return it.getString(displayNameIndex)
+            }
+        }
+
+        return ""
+    }
+
+    // Método para obter o tamanho do arquivo a partir da Uri
+    private fun getFileSize(uri: Uri, context: Context): String {
+        val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+        var fileSizeInKB = 0.0
+
+        inputStream?.use { input ->
+            fileSizeInKB = (input.available() / 1024).toDouble()
+        }
+
+        return "$fileSizeInKB KB"
+    }
+
+    // Mostra uma mensagem ao usuário sobre a deleção de um arquivo
+    private fun showFileDeletedMessage(message: String) {
         currentItemView?.let { view ->
             val snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT)
             val snackbarView = snackbar.view
             val messageTextView = snackbarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+
             messageTextView.maxLines = 3
+
             snackbar.show()
         }
     }
@@ -77,72 +113,82 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.ImageViewHolder>() {
         return fileList.size
     }
 
-    // Adiciona uma nova imagem à lista
-    fun addImage(imageUri: Uri, context: Context) {
-        // Salva a imagem no armazenamento privado
-        val savedImageUri = saveImageToInternalStorage(imageUri, context)
-
-        // Adiciona a URI salva à lista e notifica a mudança
-        if (!fileList.contains(savedImageUri)) {
-            fileList.add(savedImageUri)
-            notifyItemInserted(fileList.size - 1)
-            Log.d(savedImageUri.toString(), "Saved ImageUri index: ${fileList.indexOf(savedImageUri)}")
-            Log.d("File Path", "Path: ${context.filesDir.absolutePath}")
-        }
-    }
-
-    // Salva a imagem no armazenamento interno e retorna a URI do arquivo salvo
-    private fun saveImageToInternalStorage(imageUri: Uri, context: Context): Uri {
-        val inputStream = context.contentResolver.openInputStream(imageUri)
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-        val byteArray = byteArrayOutputStream.toByteArray()
-
-        // Gera um hash SHA-256 para o nome do arquivo
-        val digest = MessageDigest.getInstance("SHA-256")
-        val hash = digest.digest(byteArray)
-        val fileName = "image_${hash.toHexString()}.jpg"
-
-        // Cria o arquivo no armazenamento interno
-        val file = context.getFileStreamPath(fileName)
-
-        // Escreve os dados da imagem no arquivo
-        if (!file.exists()) {
-            val outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE)
-            outputStream.write(byteArray)
-            outputStream.close()
-        }
-
-        return Uri.fromFile(file)
-    }
-
-    // Converte um array de bytes para uma string hexadecimal
-    private fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
-
-    // Define o listener de deleção de imagens
-    fun setDeleteListener(listener: ImageDeleteListener) {
+    // Define o listener de deleção de arquivo
+    fun setDeleteListener(listener: FileDeleteListener) {
         deleteListener = listener
     }
 
-    // Remove uma imagem da lista e do armazenamento interno
-    fun removeImage(imageUri: Uri, context: Context) {
-        val position = fileList.indexOf(imageUri)
+    // Adiciona um novo arquivo à lista
+    fun addFile(fileUri: Uri, context: Context) {
+        val savedFileUri = saveFileToInternalStorage(fileUri, context)
+
+        if (!fileList.contains(savedFileUri)) {
+            fileList.add(fileUri)
+            notifyItemInserted(fileList.size - 1)
+        }
+    }
+
+    // Remove um arquivo da lista
+    fun removeFile(fileUri: Uri) {
+        val position = fileList.indexOf(fileUri)
 
         if (position != -1 && position < fileList.size) {
             // Remove o arquivo do armazenamento interno
-            val fileToRemove = File(imageUri.path)
-            fileToRemove.delete()
+            val fileToRemove = fileUri.path?.let { File(it) }
+            fileToRemove?.delete()
 
-            // Remove o item da lista e notifica a mudança
             fileList.removeAt(position)
             notifyItemRemoved(position)
         }
     }
 
-    // ViewHolder para a exibição de uma imagem e seu botão de deleção
-    inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    // Salva o arquivo no armazenamento interno e retorna a URI do arquivo salvo
+    private fun saveFileToInternalStorage(fileUri: Uri, context: Context): Uri? {
+        val inputStream: InputStream? = context.contentResolver.openInputStream(fileUri)
+
+        inputStream?.use { input ->
+            // Gera um hash SHA-256 para o nome do arquivo
+            val digest = MessageDigest.getInstance("SHA-256")
+            val byteArray = input.readBytes()
+            val hash = digest.digest(byteArray)
+            val fileName = "file_${hash.toHexString()}"
+
+            // Cria o diretório de arquivos, se ainda não existir
+            val directory = File(context.filesDir, "files")
+
+            if (!directory.exists()) directory.mkdirs()
+
+            // Cria o arquivo no armazenamento interno
+            val file = File(directory, fileName)
+            FileOutputStream(file).use { output ->
+                output.write(byteArray)
+            }
+
+            return Uri.fromFile(file)
+        }
+
+        return null
+    }
+
+    // Converte um array de bytes para uma string hexadecimal
+    private fun ByteArray.toHexString(): String {
+        val hexChars = "0123456789ABCDEF"
+        val result = StringBuilder(size * 2)
+
+        forEach {
+            val i = it.toInt()
+            result.append(hexChars[i shr 4 and 0x0f])
+            result.append(hexChars[i and 0x0f])
+        }
+
+        return result.toString()
+    }
+
+    // ViewHolder para a exibição de um arquivo e seu botão de deleção
+    inner class FileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.findViewById(R.id.file_img)
+        val fileName: TextView = itemView.findViewById(R.id.file_name)
+        val fileSize: TextView = itemView.findViewById(R.id.file_size)
         val buttonDelete: Button = itemView.findViewById(R.id.btn_delete)
     }
 }
