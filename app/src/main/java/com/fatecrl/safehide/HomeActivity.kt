@@ -35,6 +35,7 @@ class HomeActivity : AppCompatActivity(), FileDeleteListener {
         fileListFragment.setAdapter(fileAdapter)
 
         fileAdapter.setDeleteListener(this)
+        fileAdapter.loadFilesFromDatabase() // Carregar arquivos do Firebase Database
 
         binding.apply {
             btnHide.setOnClickListener {

@@ -1,8 +1,7 @@
 package com.fatecrl.safehide.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
@@ -12,8 +11,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.fatecrl.safehide.R
+import com.fatecrl.safehide.services.FirebaseService.auth
+import com.fatecrl.safehide.services.FirebaseService.database
 import com.google.android.material.snackbar.Snackbar
-import java.io.ByteArrayOutputStream
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -29,6 +32,8 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
 
     // Lista de URIs dos arquivos
     private val fileList = mutableListOf<Uri>()
+
+    private val user = auth.currentUser
 
     // Listener para eventos de deleção de arquivo
     private var deleteListener: FileDeleteListener? = null
@@ -51,7 +56,7 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
             holder.imageView.setImageURI(fileUri)
 
             // Exibir o nome do arquivo
-            val fileName = getFileNameFromUri(fileUri, holder.itemView.context)
+            val fileName = getFileNameFromUri(fileUri)
             holder.fileName.text = fileName
 
             // Exibir o tamanho do arquivo
@@ -69,18 +74,47 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
         }
     }
 
-    // Método para obter o nome do arquivo a partir da Uri
-    private fun getFileNameFromUri(uri: Uri, context: Context): String {
-        val cursor = context.contentResolver.query(uri, null, null, null, null)
+    // Método para carregar os arquivos do Firebase Database
+    fun loadFilesFromDatabase() {
+        user?.let {
+            val userFilesRef = database.reference.child("users").child(it.uid).child("files")
+            userFilesRef.addValueEventListener(object : ValueEventListener {
+                @SuppressLint("NotifyDataSetChanged")
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    // Limpa a lista de arquivos antes de adicionar os novos dados
+                    fileList.clear()
+                    for (fileSnapshot in snapshot.children) {
+                        val fileUriString = fileSnapshot.getValue(String::class.java)
+                        fileUriString?.let {
+                            val fileUri = Uri.parse(fileUriString)
+                            fileList.add(fileUri)
+                        }
+                    }
+                    notifyDataSetChanged() // Notifica o adaptador sobre as mudanças
+                }
 
-        cursor?.use {
-            if (it.moveToFirst()) {
-                val displayNameIndex = it.getColumnIndexOrThrow("_display_name")
-                return it.getString(displayNameIndex)
-            }
+                override fun onCancelled(error: DatabaseError) {
+                    // Exibe uma mensagem de erro ao usuário
+                    currentItemView?.let { view ->
+                        val snackbar = Snackbar.make(view, "Erro ao carregar arquivos: ${error.message}", Snackbar.LENGTH_LONG)
+                        val snackbarView = snackbar.view
+                        val messageTextView = snackbarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+
+                        messageTextView.maxLines = 3
+
+                        snackbar.show()
+                    }
+                }
+            })
         }
+    }
 
-        return ""
+    // Método para obter o nome do arquivo a partir da Uri
+    private fun getFileNameFromUri(uri: Uri): String {
+        val path = uri.path
+        val fileName = path?.substringAfterLast("/")
+
+        return fileName?.substring(0, 20) + "..."
     }
 
     // Método para obter o tamanho do arquivo a partir da Uri
@@ -122,8 +156,15 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
     fun addFile(fileUri: Uri, context: Context) {
         val savedFileUri = saveFileToInternalStorage(fileUri, context)
 
-        if (!fileList.contains(savedFileUri)) {
-            fileList.add(fileUri)
+        if (savedFileUri != null && !fileList.contains(savedFileUri)) {
+            fileList.add(savedFileUri)
+
+            // Adicionar ao Firebase Database
+            user?.let {
+                val userFilesRef = database.reference.child("users").child(it.uid).child("files")
+                userFilesRef.push().setValue(savedFileUri.toString())
+            }
+
             notifyItemInserted(fileList.size - 1)
         }
     }
@@ -136,6 +177,32 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
             // Remove o arquivo do armazenamento interno
             val fileToRemove = fileUri.path?.let { File(it) }
             fileToRemove?.delete()
+
+            // Remover do Firebase Database
+            user?.let {
+                val userFilesRef = database.reference.child("users").child(it.uid).child("files")
+                userFilesRef.orderByValue().equalTo(fileUri.toString()).addListenerForSingleValueEvent(object :
+                    ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        for (fileSnapshot in snapshot.children) {
+                            fileSnapshot.ref.removeValue()
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        // Exibe uma mensagem de erro ao usuário
+                        currentItemView?.let { view ->
+                            val snackbar = Snackbar.make(view, "Erro ao remover o arquivo: ${error.message}", Snackbar.LENGTH_LONG)
+                            val snackbarView = snackbar.view
+                            val messageTextView = snackbarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
+
+                            messageTextView.maxLines = 3
+
+                            snackbar.show()
+                        }
+                    }
+                })
+            }
 
             fileList.removeAt(position)
             notifyItemRemoved(position)
