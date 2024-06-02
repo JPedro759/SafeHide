@@ -7,4 +7,5 @@
     <string name="copyright">© 2024 SafeHide. All rights reserved.</string>
     <string name="key_msg">A senha secreta servirá para ativar a criptografia dos arquivos na pasta segura quando for digitada. Ela será digitada pelo ladrão na tela de bloqueio.</string>
     <string name="forgotPassword_message">Forneça o e-mail da conta que deseja redefinir sua senha!</string>
+    <string name="warning_user_lockscreen">Para evitar a criptografia acidental dos arquivos, digite o <b>e-mail</b> da sua conta na tela de bloqueio, caso ainda esteja com o dispositivo.</string>
 </resources>
