@@ -63,17 +63,6 @@ class ProfileActivity : AppCompatActivity() {
             }
     }
 
-    // Função para iniciar o download os arquivos no dispositivo
-    private fun downloadMedias() {
-        // Chama a função para descriptografar os arquivos após o download
-        decryptFiles()
-    }
-
-    // Função para descriptografar arquivos baixados
-    private fun decryptFiles() {
-
-    }
-
     private fun setupListeners() {
         binding.apply{
             btnBack.setOnClickListener {
@@ -89,7 +78,7 @@ class ProfileActivity : AppCompatActivity() {
             }
 
             btnDownloadMedia.setOnClickListener {
-                downloadMedias()
+                // CryptographyUtils.downloadEncryptedFile()
             }
 
             btnLogout.setOnClickListener {
