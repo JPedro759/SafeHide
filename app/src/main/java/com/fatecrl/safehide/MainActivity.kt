@@ -1,14 +1,18 @@
 package com.fatecrl.safehide
 
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.fatecrl.safehide.databinding.ActivityMainBinding
+import com.fatecrl.safehide.services.DeviceAdminReceiver
 import com.fatecrl.safehide.services.FirebaseService.auth
 import com.fatecrl.safehide.services.LockScreenService
 
@@ -33,12 +37,22 @@ class MainActivity : AppCompatActivity(){
             startActivity(intent)
         }
 
-        // Verificar se o usuário está autenticado
-        val user = auth.currentUser?.uid
+        val devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val componentName = ComponentName(this, DeviceAdminReceiver::class.java)
 
-        user.let {
-            val lockScreenServiceIntent = Intent(this, LockScreenService::class.java)
-            startService(lockScreenServiceIntent)
+        if (!devicePolicyManager.isAdminActive(componentName)) {
+            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+
+            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName)
+            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "App precisa de permissões de administrador do dispositivo.")
+
+            startActivityForResult(intent, 1)
+        } else {
+            startLockScreenService()
+        }
+
+        auth.currentUser?.let {
+            startLockScreenService()
         }
 
         binding.apply {
@@ -58,7 +72,27 @@ class MainActivity : AppCompatActivity(){
 
     private fun isIgnoringBatteryOptimizations(): Boolean {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        
+
         return powerManager.isIgnoringBatteryOptimizations(packageName)
+    }
+
+    private fun startLockScreenService() {
+        val lockScreenServiceIntent = Intent(this, LockScreenService::class.java)
+        startService(lockScreenServiceIntent)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            // Permissão concedida
+            Log.d("MainActivity", "Administrador do dispositivo ativado.")
+            Toast.makeText(this, "Permissão concedida. O serviço de bloqueio de tela será iniciado.", Toast.LENGTH_SHORT).show()
+
+            startLockScreenService()
+        } else {
+            // Permissão negada
+            Log.d("MainActivity", "Administrador do dispositivo não ativado.")
+            Toast.makeText(this, "Permissão negada. O aplicativo pode não funcionar corretamente.", Toast.LENGTH_LONG).show()
+        }
     }
 }

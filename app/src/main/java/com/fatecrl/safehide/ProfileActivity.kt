@@ -85,12 +85,12 @@ class ProfileActivity : AppCompatActivity() {
                 // Deslogar o usuário do FirebasAuth
                 auth.signOut()
 
+                // Limpar a pilha de atividades e evitar que o usuário volte para a tela de perfil
+                finishAffinity()
+
                 startActivity(
                     Intent(this@ProfileActivity, LoginActivity::class.java)
                 )
-
-                // Limpar a pilha de atividades e evitar que o usuário volte para a tela de perfil
-                finishAffinity()
             }
         }
     }
