@@ -3,11 +3,17 @@ package com.fatecrl.safehide
 import android.app.Activity
 import android.app.KeyguardManager
 import android.content.Context
+import android.content.Intent
+import android.graphics.PixelFormat
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.KeyEvent
+import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.fatecrl.safehide.model.User
@@ -18,14 +24,41 @@ import com.google.firebase.database.DatabaseReference
 class LockScreenActivity : Activity() {
 
     private lateinit var usersRef: DatabaseReference
-
     private var storedPin: String? = null
     private var storedEmail: String? = null
+    private lateinit var enteredPin: String
+
+    companion object {
+        const val REQUEST_CODE_OVERLAY_PERMISSION = 1234
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.lock_screen)
 
+        if (!Settings.canDrawOverlays(this)) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName")
+            )
+            startActivityForResult(intent, REQUEST_CODE_OVERLAY_PERMISSION)
+        } else {
+            setupLockScreen()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_OVERLAY_PERMISSION) {
+            if (Settings.canDrawOverlays(this)) {
+                setupLockScreen()
+            } else {
+                Toast.makeText(this, "Permissão necessária para bloquear a tela!", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun setupLockScreen() {
         usersRef = database.reference.child("users")
 
         // Tornar a atividade em tela cheia
@@ -36,6 +69,9 @@ class LockScreenActivity : Activity() {
         val keyguardLock = keyguardManager.newKeyguardLock("LockScreenActivity")
         keyguardLock.disableKeyguard()
 
+        // Impedir que a tela se apague
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         // Obtém o ID do usuário atualmente autenticado
         val userId = auth.currentUser?.uid
 
@@ -44,17 +80,16 @@ class LockScreenActivity : Activity() {
         }
 
         findViewById<Button>(R.id.btnConfirmPIN).setOnClickListener {
-            val enteredPin = findViewById<EditText>(R.id.passwordPINInput).text.toString()
+            enteredPin = findViewById<EditText>(R.id.passwordPINInput).text.toString()
 
-            if (storedPin != null && enteredPin == storedPin) {
+            if (storedPin != null && isPasswordCorrect()) {
                 finish()
 
                 // Aqui a função de criptografia e a função de upload serão chamadas!
-            } else if (storedEmail != null && enteredPin == storedEmail) {
+            } else if (storedEmail != null && isEmailCorrect()) {
                 finish()
-            }
-            else {
-                Toast.makeText(this, "senha incorreta!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Senha incorreta!", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -79,19 +114,20 @@ class LockScreenActivity : Activity() {
             }
     }
 
-    override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
-        return if (event?.keyCode == KeyEvent.KEYCODE_BACK ||
-            event?.keyCode == KeyEvent.KEYCODE_HOME ||
-            event?.keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
-            // Consume o evento para evitar que chegue ao sistema operacional
-            true
-        } else super.dispatchKeyEvent(event)
-    }
-
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         // Desabilitar outros botões físicos (como volume, energia, etc.)
-        return if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+        return if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
+            keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             true
         } else super.onKeyDown(keyCode, event)
+    }
+
+    override fun onBackPressed() {}
+    fun isPasswordCorrect(): Boolean {
+        return storedPin != null && enteredPin == storedPin
+    }
+
+    fun isEmailCorrect(): Boolean {
+        return storedPin != null && enteredPin == storedEmail
     }
 }

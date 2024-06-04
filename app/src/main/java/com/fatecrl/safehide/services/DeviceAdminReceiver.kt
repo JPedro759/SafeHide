@@ -6,13 +6,4 @@ import android.content.Intent
 
 class DeviceAdminReceiver : DeviceAdminReceiver() {
 
-    override fun onEnabled(context: Context, intent: Intent) {
-        super.onEnabled(context, intent)
-        // Ativar permissões do administrador do dispositivo
-    }
-
-    override fun onDisabled(context: Context, intent: Intent) {
-        super.onDisabled(context, intent)
-        // Desativar permissões do administrador do dispositivo
-    }
 }
