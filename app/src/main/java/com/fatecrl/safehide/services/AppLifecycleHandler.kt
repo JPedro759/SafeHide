@@ -38,6 +38,7 @@ class AppLifecycleHandler : Application.ActivityLifecycleCallbacks {
 
                 if (!activity.isPasswordCorrect() || !activity.isEmailCorrect()) {
                     val lockScreenIntent = Intent(activity, LockScreenActivity::class.java)
+                    lockScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     activity.startActivity(lockScreenIntent)
                 }
             }
