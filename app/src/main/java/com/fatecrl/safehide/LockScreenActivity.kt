@@ -17,6 +17,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.fatecrl.safehide.model.User
+import com.fatecrl.safehide.services.AppLifecycleHandler
 import com.fatecrl.safehide.services.FirebaseService.auth
 import com.fatecrl.safehide.services.FirebaseService.database
 import com.google.firebase.database.DatabaseReference
@@ -26,10 +27,12 @@ class LockScreenActivity : Activity() {
     private lateinit var usersRef: DatabaseReference
     private var storedPin: String? = null
     private var storedEmail: String? = null
-    private lateinit var enteredPin: String
+    private var enteredPin: String? = null
 
     companion object {
         const val REQUEST_CODE_OVERLAY_PERMISSION = 1234
+        var isPasswordCorrect = false
+        var isEmailCorrect = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -123,11 +126,24 @@ class LockScreenActivity : Activity() {
     }
 
     override fun onBackPressed() {}
+
     fun isPasswordCorrect(): Boolean {
-        return storedPin != null && enteredPin == storedPin
+        return when {
+            storedPin != null && enteredPin == storedPin -> {
+                isPasswordCorrect = true
+                true
+            }
+            else -> false
+        }
     }
 
     fun isEmailCorrect(): Boolean {
-        return storedPin != null && enteredPin == storedEmail
+        return when {
+            storedPin != null && enteredPin == storedEmail -> {
+                isEmailCorrect = true
+                true
+            }
+            else -> false
+        }
     }
 }

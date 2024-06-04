@@ -13,14 +13,7 @@ class AppLifecycleHandler : Application.ActivityLifecycleCallbacks {
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
 
-    override fun onActivityStarted(activity: Activity) {
-        if (numStarted == 0) {
-            // app went to foreground
-            Log.d("AppLifecycleHandler", "App in foreground")
-        }
-
-        numStarted++
-    }
+    override fun onActivityStarted(activity: Activity) { numStarted++ }
 
     override fun onActivityResumed(activity: Activity) {}
 
@@ -32,15 +25,10 @@ class AppLifecycleHandler : Application.ActivityLifecycleCallbacks {
         if (numStarted == 0) {
             Log.d("AppLifecycleHandler", "App in background")
 
-            if (activity is LockScreenActivity) {
-                Log.d("Password: ", "${activity.isPasswordCorrect()}")
-                Log.d("Email: ", "${activity.isEmailCorrect()}")
-
-                if (!activity.isPasswordCorrect() || !activity.isEmailCorrect()) {
-                    val lockScreenIntent = Intent(activity, LockScreenActivity::class.java)
-                    lockScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    activity.startActivity(lockScreenIntent)
-                }
+            if (activity is LockScreenActivity && !LockScreenActivity.isPasswordCorrect) {
+                val lockScreenIntent = Intent(activity, LockScreenActivity::class.java)
+                lockScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                activity.startActivity(lockScreenIntent)
             }
         }
     }
