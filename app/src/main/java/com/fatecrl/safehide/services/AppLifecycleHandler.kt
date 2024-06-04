@@ -13,7 +13,9 @@ class AppLifecycleHandler : Application.ActivityLifecycleCallbacks {
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
 
-    override fun onActivityStarted(activity: Activity) { numStarted++ }
+    override fun onActivityStarted(activity: Activity) {
+        numStarted++
+    }
 
     override fun onActivityResumed(activity: Activity) {}
 
@@ -25,11 +27,13 @@ class AppLifecycleHandler : Application.ActivityLifecycleCallbacks {
         if (numStarted == 0) {
             Log.d("AppLifecycleHandler", "App in background")
 
-            if (activity is LockScreenActivity && !LockScreenActivity.isPasswordCorrect) {
+            if (activity is LockScreenActivity && !LockScreenActivity.isEmailCorrect) {
                 val lockScreenIntent = Intent(activity, LockScreenActivity::class.java)
                 lockScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 activity.startActivity(lockScreenIntent)
             }
+
+            LockScreenActivity.isEmailCorrect = false
         }
     }
 
