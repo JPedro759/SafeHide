@@ -24,9 +24,6 @@ class AppLifecycleHandler : Application.ActivityLifecycleCallbacks {
     override fun onActivityStopped(activity: Activity) {
         numStarted--
 
-        Log.d("Email", "${LockScreenActivity.isEmailCorrect}")
-        Log.d("Password", "${LockScreenActivity.isPasswordCorrect}")
-
         if (numStarted == 0) {
             Log.d("AppLifecycleHandler", "App in background")
 
@@ -48,7 +45,6 @@ class AppLifecycleHandler : Application.ActivityLifecycleCallbacks {
                 LockScreenActivity.isPasswordCorrect = true
                 LockScreenActivity.isEmailCorrect = true
             }
-
         }
     }
 
