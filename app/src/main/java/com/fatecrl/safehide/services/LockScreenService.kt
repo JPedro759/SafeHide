@@ -27,9 +27,11 @@ class LockScreenService : Service() {
         // Register the receiver to listen to screen on/off and user present actions
         screenStateReceiver = ScreenStateReceiver()
         val filter = IntentFilter()
+
         filter.addAction(Intent.ACTION_SCREEN_OFF)
         filter.addAction(Intent.ACTION_SCREEN_ON)
         filter.addAction(Intent.ACTION_USER_PRESENT)
+
         registerReceiver(screenStateReceiver, filter)
 
         // Start the service in the foreground to avoid it being killed
