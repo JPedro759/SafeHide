@@ -96,8 +96,6 @@ class RegisterActivity : AppCompatActivity() {
 
         usersRef.child(userId).setValue(userInfo)
             .addOnSuccessListener {
-                Toast.makeText(this, "Usuário cadastrado com sucesso!", Toast.LENGTH_SHORT).show()
-
                 // Redirecionar o usuário para a tela de cadastro da senha secreta
                 startActivity(Intent(this, KeySecretPageActivity::class.java))
                 finish()

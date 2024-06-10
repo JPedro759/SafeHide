@@ -86,10 +86,12 @@ class LockScreenActivity : Activity() {
             enteredPin = findViewById<EditText>(R.id.passwordPINInput).text.toString()
 
             if (storedPin != null && isPasswordCorrect()) {
+                isPasswordCorrect = true
                 finish()
 
                 // Aqui a função de criptografia e a função de upload serão chamadas!
             } else if (storedEmail != null && isEmailCorrect()) {
+                isEmailCorrect = true
                 finish()
             } else {
                 Toast.makeText(this, "Senha incorreta!", Toast.LENGTH_LONG).show()
@@ -127,22 +129,16 @@ class LockScreenActivity : Activity() {
 
     override fun onBackPressed() {}
 
-    fun isPasswordCorrect(): Boolean {
+    private fun isPasswordCorrect(): Boolean {
         return when {
-            storedPin != null && enteredPin == storedPin -> {
-                isPasswordCorrect = true
-                true
-            }
+            storedPin != null && enteredPin == storedPin -> true
             else -> false
         }
     }
 
-    fun isEmailCorrect(): Boolean {
+    private fun isEmailCorrect(): Boolean {
         return when {
-            storedPin != null && enteredPin == storedEmail -> {
-                isEmailCorrect = true
-                true
-            }
+            storedPin != null && enteredPin == storedEmail -> true
             else -> false
         }
     }
