@@ -18,7 +18,30 @@ object CryptographyService {
         return keyGenerator.generateKey()
     }
 
-    fun encryptMediaFiles(fileUris: List<Uri>, masterKey: SecretKey, context: Context): List<Pair<Uri, ByteArray>> {
+    private fun generateMasterKey(): SecretKey {
+        val keyGenerator = KeyGenerator.getInstance("AES")
+        val secureRandom = SecureRandom.getInstanceStrong() // Utiliza uma instância forte de SecureRandom
+        keyGenerator.init(256, secureRandom) // Inicializa o KeyGenerator com um SecureRandom adequado
+        return keyGenerator.generateKey()
+    }
+
+    // Esta função criptografa a chave de criptografia do arquivo (fileKey) usando uma chave mestra (masterKey).
+    private fun encryptKey(fileKey: SecretKey): ByteArray {
+        val cipher = Cipher.getInstance("AES")
+        cipher.init(Cipher.WRAP_MODE, generateMasterKey())
+
+        return cipher.wrap(fileKey)
+    }
+
+    // Esta função descriptografa a chave de criptografia do arquivo (encryptedKey) usando a mesma chave mestra (masterKey).
+    private fun decryptKey(encryptedKey: ByteArray): SecretKey {
+        val cipher = Cipher.getInstance("AES")
+        cipher.init(Cipher.UNWRAP_MODE, generateMasterKey())
+
+        return cipher.unwrap(encryptedKey, "AES", Cipher.SECRET_KEY) as SecretKey
+    }
+
+    fun encryptMediaFiles(fileUris: List<Uri>, context: Context): List<Pair<Uri, ByteArray>> {
         val encryptedFiles = mutableListOf<Pair<Uri, ByteArray>>()
 
         fileUris.forEach { fileUri ->
@@ -54,8 +77,9 @@ object CryptographyService {
                     }
                 }
 
-                val encryptedFileKey = encryptKey(secretKey, masterKey)
+                val encryptedFileKey = encryptKey(secretKey)
                 val encryptedUri = Uri.fromFile(outputFile)
+
                 encryptedFiles.add(encryptedUri to encryptedFileKey)
 
                 // Remove temp file
@@ -66,7 +90,7 @@ object CryptographyService {
         return encryptedFiles
     }
 
-    fun decryptMediaFiles(fileUris: List<Uri>, masterKey: SecretKey, encryptedKeys: List<ByteArray>, context: Context): List<Uri> {
+    fun decryptMediaFiles(fileUris: List<Uri>, encryptedKeys: List<ByteArray>, context: Context): List<Uri> {
         val decryptedFiles = mutableListOf<Uri>()
 
         fileUris.forEachIndexed { index, fileUri ->
@@ -77,7 +101,7 @@ object CryptographyService {
                 val tempFile = File(context.cacheDir, "tempFile.encrypted")
                 tempFile.writeBytes(byteArray)
 
-                val secretKey = decryptKey(encryptedFileKey, masterKey)
+                val secretKey = decryptKey(encryptedFileKey)
                 val cipher = Cipher.getInstance("AES/GCM/NoPadding")
                 val iv = ByteArray(12)
                 FileInputStream(tempFile).use { inputFile ->
@@ -190,20 +214,4 @@ object CryptographyService {
         }
     }
      */
-
-    // Esta função criptografa a chave de criptografia do arquivo (fileKey) usando uma chave mestra (masterKey).
-    private fun encryptKey(fileKey: SecretKey, masterKey: SecretKey): ByteArray {
-        val cipher = Cipher.getInstance("AES")
-        cipher.init(Cipher.WRAP_MODE, masterKey)
-
-        return cipher.wrap(fileKey)
-    }
-
-    // Esta função descriptografa a chave de criptografia do arquivo (encryptedKey) usando a mesma chave mestra (masterKey).
-    private fun decryptKey(encryptedKey: ByteArray, masterKey: SecretKey): SecretKey {
-        val cipher = Cipher.getInstance("AES")
-        cipher.init(Cipher.UNWRAP_MODE, masterKey)
-
-        return cipher.unwrap(encryptedKey, "AES", Cipher.SECRET_KEY) as SecretKey
-    }
 }

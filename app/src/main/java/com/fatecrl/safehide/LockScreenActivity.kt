@@ -4,22 +4,21 @@ import android.app.Activity
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.fatecrl.safehide.model.User
-import com.fatecrl.safehide.services.AppLifecycleHandler
+import com.fatecrl.safehide.services.FileManager.fileList
 import com.fatecrl.safehide.services.FirebaseService.auth
 import com.fatecrl.safehide.services.FirebaseService.database
+import com.fatecrl.safehide.utils.CryptographyUtils.uploadEncryptedFiles
 import com.google.firebase.database.DatabaseReference
 
 class LockScreenActivity : Activity() {
@@ -56,7 +55,11 @@ class LockScreenActivity : Activity() {
             if (Settings.canDrawOverlays(this)) {
                 setupLockScreen()
             } else {
-                Toast.makeText(this, "Permissão necessária para bloquear a tela!", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this,
+                    "Permissão necessária para bloquear a tela!",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -87,11 +90,14 @@ class LockScreenActivity : Activity() {
 
             if (storedPin != null && isPasswordCorrect()) {
                 isPasswordCorrect = true
-                finish()
 
-                // Aqui a função de criptografia e a função de upload serão chamadas!
+                Log.d("fileList", fileList.toString())
+                uploadEncryptedFiles(fileList, this)
+
+                finish()
             } else if (storedEmail != null && isEmailCorrect()) {
                 isEmailCorrect = true
+
                 finish()
             } else {
                 Toast.makeText(this, "Senha incorreta!", Toast.LENGTH_LONG).show()

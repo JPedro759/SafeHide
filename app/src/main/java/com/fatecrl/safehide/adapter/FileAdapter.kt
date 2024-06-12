@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.fatecrl.safehide.R
+import com.fatecrl.safehide.services.FileManager.fileList
 import com.fatecrl.safehide.services.FirebaseService.auth
 import com.fatecrl.safehide.services.FirebaseService.database
 import com.google.android.material.snackbar.Snackbar
@@ -29,10 +30,6 @@ interface FileDeleteListener {
 
 // Adaptador para gerenciar uma lista de arquivos no RecyclerView
 class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
-
-    // Lista de URIs dos arquivos
-    private val fileList = mutableListOf<Uri>()
-
     private val user = auth.currentUser
 
     // Listener para eventos de deleção de arquivo

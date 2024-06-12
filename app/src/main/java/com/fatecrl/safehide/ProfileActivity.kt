@@ -2,12 +2,15 @@ package com.fatecrl.safehide
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.fatecrl.safehide.databinding.ProfilePageBinding
 import com.fatecrl.safehide.model.User
+import com.fatecrl.safehide.services.FileManager.fileList
 import com.fatecrl.safehide.services.FirebaseService.auth
 import com.fatecrl.safehide.services.FirebaseService.database
+import com.fatecrl.safehide.utils.CryptographyUtils.downloadEncryptedFiles
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -78,7 +81,18 @@ class ProfileActivity : AppCompatActivity() {
             }
 
             btnDownloadMedia.setOnClickListener {
-                // CryptographyUtils.downloadEncryptedFile()
+                Log.d("TAG", "setupListeners: $fileList")
+
+                downloadEncryptedFiles(fileList).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val downloadedFiles = task.result
+                        downloadedFiles?.forEach { file ->
+                            Log.d("TAG", "Downloaded encrypted file: ${file.absolutePath}")
+                        }
+                    } else {
+                        Log.e("TAG", "Failed to download encrypted files: ${task.exception?.message}")
+                    }
+                }
             }
 
             btnLogout.setOnClickListener {
