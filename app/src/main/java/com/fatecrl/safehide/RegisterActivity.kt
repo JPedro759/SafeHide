@@ -23,9 +23,7 @@ class RegisterActivity : AppCompatActivity() {
         usersRef = database.reference.child("users")
 
         binding.apply {
-            // Configura o listener do botão de registro
             btnRegister.setOnClickListener {
-                // Obtém os valores dos campos de entrada de texto
                 val username = binding.usernameInput.text.toString()
                 val email = binding.emailInput.text.toString().trim()
                 val password = binding.passwordInput.text.toString().trim()
@@ -36,7 +34,6 @@ class RegisterActivity : AppCompatActivity() {
                 }
             }
 
-            // Configura o listener do botão de voltar
             btnBack.setOnClickListener {
                 startActivity(
                     Intent(this@RegisterActivity, MainActivity::class.java)
@@ -90,13 +87,12 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun saveUserData(userId: String, username: String, email: String) {
-        val secretPassword = "" // Senha secreta do usuário (a ser definida)
+        val secretPassword = ""
 
         val userInfo = User(username, email, secretPassword)
 
         usersRef.child(userId).setValue(userInfo)
             .addOnSuccessListener {
-                // Redirecionar o usuário para a tela de cadastro da senha secreta
                 startActivity(Intent(this, KeySecretPageActivity::class.java))
                 finish()
             }

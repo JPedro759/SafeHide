@@ -59,9 +59,9 @@ class KeySecretPageActivity : AppCompatActivity() {
 
     private fun updateCardCheckColor(passwordSecretText: String) {
         val color = if (passwordSecretText.length >= 6) {
-            Color.parseColor("#8CFF5A") // Verde se tiver 6 ou mais caracteres
+            Color.parseColor("#8CFF5A")
         } else {
-            Color.parseColor("#DCDCDC") // Cor padrão caso contrário
+            Color.parseColor("#DCDCDC")
         }
 
         binding.cardCheck.setCardBackgroundColor(color)

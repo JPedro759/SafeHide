@@ -3,6 +3,7 @@ package com.fatecrl.safehide.services
 import android.app.Application
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
 object FirebaseService {
@@ -17,15 +18,19 @@ object FirebaseService {
     val storage: FirebaseStorage by lazy {
         FirebaseStorage.getInstance()
     }
+
+    val firestore: FirebaseFirestore by lazy {
+        FirebaseFirestore.getInstance()
+    }
 }
 
 class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // Inicialização do Firebase Auth, do Realtime Database e do Cloud Storage
         FirebaseService.auth
         FirebaseService.database
         FirebaseService.storage
+        FirebaseService.firestore
     }
 }

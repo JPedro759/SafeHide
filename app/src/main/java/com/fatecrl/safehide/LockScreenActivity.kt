@@ -67,18 +67,14 @@ class LockScreenActivity : Activity() {
     private fun setupLockScreen() {
         usersRef = database.reference.child("users")
 
-        // Tornar a atividade em tela cheia
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
-        // Desabilitar o bloqueio padrão de tela
         val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
         val keyguardLock = keyguardManager.newKeyguardLock("LockScreenActivity")
         keyguardLock.disableKeyguard()
 
-        // Impedir que a tela se apague
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // Obtém o ID do usuário atualmente autenticado
         val userId = auth.currentUser?.uid
 
         userId?.let {

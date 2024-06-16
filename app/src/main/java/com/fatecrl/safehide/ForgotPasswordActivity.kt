@@ -9,7 +9,6 @@ import com.fatecrl.safehide.services.FirebaseService.auth
 
 class ForgotPasswordActivity : AppCompatActivity() {
 
-    // Declaração dos componentes da interface do usuário
     private lateinit var binding: ForgotPasswordBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,7 +17,6 @@ class ForgotPasswordActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.apply {
-            // Listener para o botão de enviar email de redefinição de senha
             btnChangePassword.setOnClickListener {
                 val email = binding.emailInput.text.toString()
 
@@ -26,7 +24,6 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 else showMessage("Por favor, preencha o campo de email!")
             }
 
-            // Listener para o botão de voltar
             btnBack.setOnClickListener {
                 startActivity(
                     Intent(this@ForgotPasswordActivity, LoginActivity::class.java)

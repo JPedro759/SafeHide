@@ -30,7 +30,6 @@ class EditProfileActivity : AppCompatActivity() {
                 )
             }
 
-            // Obtém o ID do usuário atualmente autenticado
             val userId = auth.currentUser?.uid
 
             userId?.let {
@@ -39,7 +38,6 @@ class EditProfileActivity : AppCompatActivity() {
                 showMessage("Usuário não autenticado")
             }
 
-            // Listener para o botão de editar
             btnEdit.setOnClickListener {
                 val newName = newNameInput.text.toString()
                 val newSecretPassword = newSecretPasswordInput.text.toString().trim()
@@ -84,7 +82,6 @@ class EditProfileActivity : AppCompatActivity() {
             "secretPassword" to newSecretPassword
         )
 
-        // Atualiza os dados do usuário no Realtime Database
         usersRef.child(userId).updateChildren(updates)
             .addOnSuccessListener {
                 showMessage("Dados alterados com sucesso!")

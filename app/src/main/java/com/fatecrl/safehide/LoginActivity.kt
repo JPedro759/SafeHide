@@ -11,7 +11,6 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 
 class LoginActivity : AppCompatActivity() {
 
-    // Declaração dos componentes da interface do usuário
     private lateinit var binding: LoginBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +19,6 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.apply {
-            // Botão de login
             btnLogin.setOnClickListener {
                 val email = emailInput.text.toString().trim()
                 val password = passwordInput.text.toString().trim()
@@ -30,7 +28,6 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
 
-            // Link de recuperação de senha
             forgotPasswordLink.setOnClickListener {
                 startActivity(
                     Intent(this@LoginActivity, ForgotPasswordActivity::class.java)
@@ -56,7 +53,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    // Função de login com o email e a senha fornecidos
     private fun loginUser(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
@@ -67,12 +63,11 @@ class LoginActivity : AppCompatActivity() {
                     if (user != null && user.isEmailVerified) {
                         Toast.makeText(this, "Login bem sucedido!", Toast.LENGTH_SHORT).show()
                         startActivity(Intent(this, HomeActivity::class.java))
-                        finish() // Encerrar esta atividade para evitar que o usuário retorne a ela usando o botão de voltar
+                        finish()
                     } else {
                         Toast.makeText(this, "Por favor, verifique seu email!", Toast.LENGTH_LONG).show()
                     }
                 } else {
-                    // Verificar o tipo de erro retornado pela task
                     val errorMessage = when (task.exception) {
                         is FirebaseAuthInvalidCredentialsException -> "Email ou senha incorreta!"
                         else -> "Falha no login! Verifique suas credenciais."

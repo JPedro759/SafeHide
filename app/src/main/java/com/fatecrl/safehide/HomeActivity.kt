@@ -35,13 +35,13 @@ class HomeActivity : AppCompatActivity(), FileDeleteListener {
         fileListFragment.setAdapter(fileAdapter)
 
         fileAdapter.setDeleteListener(this)
-        fileAdapter.loadFilesFromDatabase() // Carregar arquivos do Firebase Database
+        fileAdapter.loadFilesFromDatabase()
 
         binding.apply {
             btnHide.setOnClickListener {
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 intent.addCategory(Intent.CATEGORY_OPENABLE)
-                intent.type = "*/*" // Permitir que o usuário selecione qualquer tipo de arquivo
+                intent.type = "*/*"
                 pickFiles.launch(intent)
             }
 

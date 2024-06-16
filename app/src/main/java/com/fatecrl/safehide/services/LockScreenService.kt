@@ -24,7 +24,6 @@ class LockScreenService : Service() {
 
         Log.d("LockScreenService", "Service created")
 
-        // Register the receiver to listen to screen on/off and user present actions
         screenStateReceiver = ScreenStateReceiver()
         val filter = IntentFilter()
 
@@ -34,7 +33,6 @@ class LockScreenService : Service() {
 
         registerReceiver(screenStateReceiver, filter)
 
-        // Start the service in the foreground to avoid it being killed
         startForeground(1, createNotification())
     }
 

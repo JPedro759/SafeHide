@@ -84,13 +84,11 @@ class MainActivity : AppCompatActivity(){
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            // Permissão concedida
             Log.d("MainActivity", "Administrador do dispositivo ativado.")
             Toast.makeText(this, "Permissão concedida. O serviço de bloqueio de tela será iniciado.", Toast.LENGTH_SHORT).show()
 
             startLockScreenService()
         } else {
-            // Permissão negada
             Log.d("MainActivity", "Administrador do dispositivo não ativado.")
             Toast.makeText(this, "Permissão negada. O aplicativo pode não funcionar corretamente.", Toast.LENGTH_LONG).show()
         }
