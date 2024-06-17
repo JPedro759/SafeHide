@@ -5,6 +5,9 @@ import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import com.fatecrl.safehide.services.CryptographyService
+import com.fatecrl.safehide.services.CryptographyService.decryptMediaFiles
+import com.fatecrl.safehide.services.CryptographyService.encryptMediaFiles
+import com.fatecrl.safehide.services.FirebaseService.firestore
 import com.fatecrl.safehide.services.FirebaseService.storage
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -52,7 +55,7 @@ object CryptographyUtils {
     }
 
     fun uploadEncryptedFiles(fileUris: List<Uri>, context: Context): Task<Void> {
-        val encryptedFiles = CryptographyService(context).encryptMediaFiles(fileUris)
+        val encryptedFiles = encryptMediaFiles(fileUris, context)
 
         val uploadTasks = encryptedFiles.map { (encryptedUri) ->
             val fileUploadTask = uploadFileToStorage(encryptedUri, "encrypted_files/${UUID.randomUUID()}")
@@ -90,7 +93,6 @@ object CryptographyUtils {
     }
 
     fun downloadEncryptedFiles(context: Context) {
-
         // Diretório de Downloads da galeria
         val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
@@ -99,35 +101,33 @@ object CryptographyUtils {
                 val fileNames = getFilesFromCloudStorage()
                 Log.d("TAG", "Files to download: $fileNames")
 
-                fileNames.forEach { fileName ->
+                for (fileName in fileNames) {
                     val encryptedFileRef = storage.reference.child("encrypted_files/$fileName")
-                    Log.d("TAG", "File path: ${encryptedFileRef.path}")
+                    Log.d("TAG", "File path: $encryptedFileRef")
 
-                    encryptedFileRef.getBytes(Long.MAX_VALUE).addOnSuccessListener { encryptedBytes ->
-                        val tempFile = File.createTempFile("temp", null, context.cacheDir)
-                        Log.d("TAG", "Temp file created: ${tempFile.absolutePath}")
-                        tempFile.writeBytes(encryptedBytes)
-                        Log.d("TAG", "Encrypted bytes written to file")
+                    val encryptedBytes = Tasks.await(encryptedFileRef.getBytes(Long.MAX_VALUE))
+                    val tempFile = File.createTempFile("temp", null, context.cacheDir)
+                    Log.d("TAG", "Temp file created: ${tempFile.absolutePath}")
+                    tempFile.writeBytes(encryptedBytes)
+                    Log.d("TAG", "Encrypted bytes written to file")
 
-                        val decryptedUris = CryptographyService(context).decryptMediaFiles(listOf(Uri.fromFile(tempFile)), context)
-                        Log.d("TAG", "Decrypted URIs: $decryptedUris")
+                    // Pass the fetched fileId to decryptMediaFiles
+                    val decryptedUris = decryptMediaFiles(listOf(Uri.fromFile(tempFile)), context)
+                    Log.d("TAG", "Decrypted URIs: $decryptedUris")
 
-                        decryptedUris.forEach { decryptedUri ->
-                            val outputFile = File(downloadDir, fileName.removeSuffix(".encrypted"))
-                            Log.d("TAG", "Decrypting file: ${decryptedUri.path}")
+                    decryptedUris.forEach { decryptedUri ->
+                        val outputFile = File(downloadDir, fileName.removeSuffix(".encrypted"))
+                        Log.d("TAG", "Decrypting file: ${decryptedUri.path}")
 
-                            decryptedUri.path?.let { filePath ->
-                                val decryptedFile = File(filePath)
-                                decryptedFile.copyTo(outputFile, overwrite = true)
+                        decryptedUri.path?.let { filePath ->
+                            val decryptedFile = File(filePath)
+                            decryptedFile.copyTo(outputFile, overwrite = true)
 
-                                Log.d("TAG", "Arquivo descriptografado salvo em: ${outputFile.absolutePath}")
-                            }
+                            Log.d("TAG", "Arquivo descriptografado salvo em: ${outputFile.absolutePath}")
                         }
-
-                        tempFile.delete()
-                    }.addOnFailureListener {
-                        Log.e("TAG", "Falha ao baixar o arquivo: $it")
                     }
+
+                    tempFile.delete()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

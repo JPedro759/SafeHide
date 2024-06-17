@@ -7,6 +7,7 @@ import android.util.Base64
 import android.util.Log
 import com.fatecrl.safehide.services.FirebaseService.auth
 import com.fatecrl.safehide.services.FirebaseService.firestore
+import com.google.android.gms.tasks.Tasks
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -17,7 +18,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-class CryptographyService (private val context: Context) {
+object CryptographyService {
     private fun generateEncryptionKey(): SecretKey {
         val keyGenerator = KeyGenerator.getInstance("AES")
         keyGenerator.init(256)
@@ -71,7 +72,7 @@ class CryptographyService (private val context: Context) {
         return Base64.decode(this, Base64.DEFAULT)
     }
 
-    fun encryptMediaFiles(fileUris: List<Uri>): List<Pair<Uri, ByteArray>> {
+    fun encryptMediaFiles(fileUris: List<Uri>, context: Context): List<Pair<Uri, ByteArray>> {
         val encryptedFiles = mutableListOf<Pair<Uri, ByteArray>>()
         val masterKey = generateMasterKey()
         val user = auth.currentUser ?: throw IllegalStateException("User not authenticated")
@@ -116,6 +117,7 @@ class CryptographyService (private val context: Context) {
                 println("Arquivo criptografado com sucesso: $fileUri")
             }
         }
+
         return encryptedFiles
     }
 
