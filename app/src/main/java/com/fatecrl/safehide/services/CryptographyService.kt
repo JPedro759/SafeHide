@@ -8,15 +8,23 @@ import android.util.Log
 import com.fatecrl.safehide.services.FirebaseService.auth
 import com.fatecrl.safehide.services.FirebaseService.firestore
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.security.SecureRandom
+import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 object CryptographyService {
     private fun generateEncryptionKey(): SecretKey {
@@ -36,6 +44,35 @@ object CryptographyService {
         return keyGenerator.generateKey()
     }
 
+    private fun saveMasterKeyToFirestore(uid: String, masterKey: SecretKey) {
+        val masterKeyData = hashMapOf("uid" to uid, "masterKey" to masterKey.encoded.toBase64())
+
+        firestore.collection("masterKeys").add(masterKeyData)
+            .addOnSuccessListener {
+                Log.d("Firestore", "Master key saved successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error saving master key", e)
+            }
+    }
+
+    private suspend fun getMasterKey(uid: String): SecretKey? = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val documentSnapshot =
+                Tasks.await(firestore.collection("masterKeys").document(uid).get())
+            val masterKeyBase64 = documentSnapshot.getString("masterKey")
+            if (masterKeyBase64 != null) {
+                val masterKeyBytes = masterKeyBase64.fromBase64()
+                SecretKeySpec(masterKeyBytes, "AES")
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error fetching master key", e)
+            null
+        }
+    }
+
     private fun encryptKey(fileKey: SecretKey, masterKey: SecretKey): ByteArray {
         val cipher = Cipher.getInstance("AES")
         cipher.init(Cipher.WRAP_MODE, masterKey)
@@ -48,11 +85,17 @@ object CryptographyService {
         return cipher.unwrap(encryptedKey, "AES", Cipher.SECRET_KEY) as SecretKey
     }
 
-    private fun saveKeyToFirestore(uid: String, fileId: String, encryptedKey: ByteArray) {
+    private fun saveKeyToFirestore(
+        uid: String,
+        fileId: String,
+        encryptedKey: ByteArray,
+        fileName: String
+    ) {
         val keyData = hashMapOf(
             "uid" to uid,
             "fileId" to fileId,
-            "encryptedKey" to encryptedKey.toBase64()
+            "encryptedKey" to encryptedKey.toBase64(),
+            "fileName" to fileName
         )
 
         firestore.collection("keys").add(keyData)
@@ -72,11 +115,14 @@ object CryptographyService {
         return Base64.decode(this, Base64.DEFAULT)
     }
 
-    fun encryptMediaFiles(fileUris: List<Uri>, context: Context): List<Pair<Uri, ByteArray>> {
-        val encryptedFiles = mutableListOf<Pair<Uri, ByteArray>>()
+    fun encryptMediaFiles(fileUris: List<Uri>, context: Context): List<Pair<Uri, String>> {
+        val encryptedFiles = mutableListOf<Pair<Uri, String>>()
         val masterKey = generateMasterKey()
         val user = auth.currentUser ?: throw IllegalStateException("User not authenticated")
         val uid = user.uid
+
+        // Salva a chave mestra no Firestore
+        saveMasterKeyToFirestore(uid, masterKey)
 
         fileUris.forEach { fileUri ->
             val inputStream = context.contentResolver.openInputStream(fileUri)
@@ -92,7 +138,8 @@ object CryptographyService {
                 val gcmSpec = GCMParameterSpec(128, iv)
                 cipher.init(Cipher.ENCRYPT_MODE, secretKey, gcmSpec)
 
-                val outputFile = File(tempFile.path + ".encrypted")
+                val uniqueFileName = UUID.randomUUID().toString() + ".encrypted"
+                val outputFile = File(context.cacheDir, uniqueFileName)
                 FileInputStream(tempFile).use { inputFile ->
                     FileOutputStream(outputFile).use { outputStream ->
                         outputStream.write(iv)
@@ -109,10 +156,14 @@ object CryptographyService {
 
                 val encryptedFileKey = encryptKey(secretKey, masterKey)
                 val encryptedUri = Uri.fromFile(outputFile)
-                encryptedFiles.add(encryptedUri to encryptedFileKey)
+                encryptedFiles.add(encryptedUri to uniqueFileName)
 
-                // Save the encrypted file key and master key to Firestore
-                saveKeyToFirestore(uid, fileUri.lastPathSegment ?: "", encryptedFileKey)
+                saveKeyToFirestore(
+                    uid,
+                    fileUri.lastPathSegment ?: "",
+                    encryptedFileKey,
+                    uniqueFileName
+                )
 
                 println("Arquivo criptografado com sucesso: $fileUri")
             }
@@ -121,68 +172,96 @@ object CryptographyService {
         return encryptedFiles
     }
 
-    fun decryptMediaFiles(fileUris: List<Uri>, context: Context): List<Uri> {
+    fun decryptMediaFiles(fileUris: List<StorageReference>, context: Context, fileId: String): List<Uri> {
         val decryptedFiles = mutableListOf<Uri>()
-        val user = auth.currentUser ?: throw IllegalStateException("User not authenticated")
-        val uid = user.uid
+        val uid = auth.currentUser?.uid
 
         val latch = CountDownLatch(fileUris.size)
 
-        fileUris.forEach { fileUri ->
-            val inputStream = context.contentResolver.openInputStream(fileUri)
-            inputStream?.use { input ->
-                val byteArray = input.readBytes()
-                val tempFile = File(context.cacheDir, "tempFile.encrypted")
-                tempFile.writeBytes(byteArray)
+        // Usando um novo escopo de coroutine
+        CoroutineScope(Dispatchers.IO).launch {
+            fileUris.forEach { fileRef ->
+                try {
+                    val encryptedBytes = fileRef.getBytes(Long.MAX_VALUE).await() // await() para esperar a conclusão assíncrona
 
-                // Retrieve the encrypted file key and master key from Firestore
-                firestore.collection("keys")
-                    .whereEqualTo("uid", uid)
-                    .whereEqualTo("fileId", fileUri.lastPathSegment)
-                    .get()
-                    .addOnSuccessListener { documents ->
-                        for (document in documents) {
-                            val encryptedFileKey = document.getString("encryptedKey")!!.fromBase64()
-                            val secretKey = decryptKey(encryptedFileKey, generateMasterKey())
+                    val tempFile = File.createTempFile("temp", ".encrypted", context.cacheDir)
+                    tempFile.writeBytes(encryptedBytes)
 
-                            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-                            val iv = ByteArray(12)
-                            FileInputStream(tempFile).use { inputFile ->
-                                inputFile.read(iv)
-                                val gcmSpec = GCMParameterSpec(128, iv)
-                                cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmSpec)
+                    Log.d("TAG", "Temp file created: ${tempFile.absolutePath}")
 
-                                val outputFile = File(tempFile.path.removeSuffix(".encrypted") + ".decrypted")
-                                FileOutputStream(outputFile).use { outputStream ->
-                                    val buffer = ByteArray(1024)
-                                    var bytesRead: Int
-                                    while (inputFile.read(buffer).also { bytesRead = it } != -1) {
-                                        val decryptedBytes = cipher.update(buffer, 0, bytesRead)
-                                        if (decryptedBytes != null) {
-                                            outputStream.write(decryptedBytes)
-                                        }
-                                    }
-                                    val finalBytes = cipher.doFinal()
-                                    if (finalBytes != null) {
-                                        outputStream.write(finalBytes)
+                    val documents = firestore.collection("keys")
+                        .whereEqualTo("uid", uid)
+                        .whereEqualTo("fileId", fileId)
+                        .get().await() // await() para esperar a conclusão assíncrona
+
+                    if (documents.isEmpty) {
+                        Log.e("Firestore", "No documents found for fileId: $fileId")
+                        tempFile.delete()
+                        latch.countDown()
+                        return@launch
+                    }
+
+                    for (document in documents) {
+                        val encryptedFileKey = document.getString("encryptedKey")?.fromBase64()
+                        if (encryptedFileKey == null) {
+                            Log.e(
+                                "Firestore",
+                                "No encryptedFileKey found for document: ${document.id}"
+                            )
+                            tempFile.delete()
+                            latch.countDown()
+                            continue
+                        }
+
+                        val masterKey = getMasterKey(uid!!)
+                        if (masterKey == null) {
+                            Log.e("Firestore", "Master key not found for uid: $uid")
+                            tempFile.delete()
+                            latch.countDown()
+                            continue
+                        }
+
+                        val secretKey = decryptKey(encryptedFileKey, masterKey)
+                        Log.d("TAG", "Secret key: $secretKey")
+
+                        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                        val iv = ByteArray(12)
+                        FileInputStream(tempFile).use { inputFile ->
+                            inputFile.read(iv)
+                            val gcmSpec = GCMParameterSpec(128, iv)
+                            cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmSpec)
+
+                            val outputFile =
+                                File(tempFile.path.removeSuffix(".encrypted") + ".decrypted")
+                            FileOutputStream(outputFile).use { outputStream ->
+                                val buffer = ByteArray(1024)
+                                var bytesRead: Int
+                                while (inputFile.read(buffer).also { bytesRead = it } != -1) {
+                                    val decryptedBytes = cipher.update(buffer, 0, bytesRead)
+                                    if (decryptedBytes != null) {
+                                        outputStream.write(decryptedBytes)
                                     }
                                 }
-
-                                val decryptedUri = Uri.fromFile(outputFile)
-                                decryptedFiles.add(decryptedUri)
-                                tempFile.delete()
+                                val finalBytes = cipher.doFinal()
+                                if (finalBytes != null) {
+                                    outputStream.write(finalBytes)
+                                }
                             }
+
+                            val decryptedUri = Uri.fromFile(outputFile)
+                            decryptedFiles.add(decryptedUri)
+                            tempFile.delete()
                         }
-                        latch.countDown()
                     }
-                    .addOnFailureListener { exception ->
-                        Log.w("Firestore", "Error getting documents: ", exception)
-                        latch.countDown()
-                    }
+                } catch (e: Exception) {
+                    Log.e("TAG", "Error decrypting file", e)
+                } finally {
+                    latch.countDown()
+                }
             }
         }
 
-        latch.await() // Aguarde até que todas as operações assíncronas sejam concluídas
+        latch.await()
 
         return decryptedFiles
     }

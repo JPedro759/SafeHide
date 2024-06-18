@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
-import com.fatecrl.safehide.services.CryptographyService
 import com.fatecrl.safehide.services.CryptographyService.decryptMediaFiles
 import com.fatecrl.safehide.services.CryptographyService.encryptMediaFiles
 import com.fatecrl.safehide.services.FirebaseService.firestore
@@ -17,6 +16,7 @@ import com.google.firebase.storage.UploadTask
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.io.IOException
 import java.util.UUID
@@ -57,8 +57,8 @@ object CryptographyUtils {
     fun uploadEncryptedFiles(fileUris: List<Uri>, context: Context): Task<Void> {
         val encryptedFiles = encryptMediaFiles(fileUris, context)
 
-        val uploadTasks = encryptedFiles.map { (encryptedUri) ->
-            val fileUploadTask = uploadFileToStorage(encryptedUri, "encrypted_files/${UUID.randomUUID()}")
+        val uploadTasks = encryptedFiles.map { (encryptedUri, fileName) ->
+            val fileUploadTask = uploadFileToStorage(encryptedUri, "encrypted_files/$fileName")
 
             fileUploadTask
         }
@@ -92,6 +92,19 @@ object CryptographyUtils {
         }
     }
 
+    private fun getFileId(fileName: String): String? {
+        return try {
+            val document = Tasks.await(firestore.collection("keys")
+                .whereEqualTo("fileName", fileName)
+                .get()).documents.firstOrNull()
+
+            document?.getString("fileId")
+        } catch (e: Exception) {
+            Log.e("TAG", "Error fetching fileId from Firestore", e)
+            null
+        }
+    }
+
     fun downloadEncryptedFiles(context: Context) {
         // Diretório de Downloads da galeria
         val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -105,14 +118,18 @@ object CryptographyUtils {
                     val encryptedFileRef = storage.reference.child("encrypted_files/$fileName")
                     Log.d("TAG", "File path: $encryptedFileRef")
 
-                    val encryptedBytes = Tasks.await(encryptedFileRef.getBytes(Long.MAX_VALUE))
-                    val tempFile = File.createTempFile("temp", null, context.cacheDir)
-                    Log.d("TAG", "Temp file created: ${tempFile.absolutePath}")
-                    tempFile.writeBytes(encryptedBytes)
-                    Log.d("TAG", "Encrypted bytes written to file")
+                    // Fetch the fileId from Firestore
+                    val fileId = getFileId(fileName)
 
-                    // Pass the fetched fileId to decryptMediaFiles
-                    val decryptedUris = decryptMediaFiles(listOf(Uri.fromFile(tempFile)), context)
+                    if (fileId == null) {
+                        Log.e("TAG", "File ID not found for fileName: $fileName")
+                        continue
+                    }
+
+                    Log.d("TAG", "File ID found for fileName: $fileName")
+
+                    // Passa o URI do Cloud Storage diretamente para a função de descriptografia
+                    val decryptedUris = decryptMediaFiles(listOf(encryptedFileRef), context, fileId)
                     Log.d("TAG", "Decrypted URIs: $decryptedUris")
 
                     decryptedUris.forEach { decryptedUri ->
@@ -126,8 +143,6 @@ object CryptographyUtils {
                             Log.d("TAG", "Arquivo descriptografado salvo em: ${outputFile.absolutePath}")
                         }
                     }
-
-                    tempFile.delete()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
