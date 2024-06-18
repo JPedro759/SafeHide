@@ -202,6 +202,7 @@ object CryptographyService {
 
                     for (document in documents) {
                         val encryptedFileKey = document.getString("encryptedKey")?.fromBase64()
+                        Log.d("TAG", "Encrypted File Key: ${Base64.encodeToString(encryptedFileKey, Base64.DEFAULT)}")
                         if (encryptedFileKey == null) {
                             Log.e(
                                 "Firestore",
@@ -221,7 +222,7 @@ object CryptographyService {
                         }
 
                         val secretKey = decryptKey(encryptedFileKey, masterKey)
-                        Log.d("TAG", "Secret key: $secretKey")
+                        Log.d("TAG", "Decrypted Secret Key: ${Base64.encodeToString(secretKey.encoded, Base64.DEFAULT)}")
 
                         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
                         val iv = ByteArray(12)
