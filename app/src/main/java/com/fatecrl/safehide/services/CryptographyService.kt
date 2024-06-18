@@ -178,7 +178,6 @@ object CryptographyService {
 
         val latch = CountDownLatch(fileUris.size)
 
-        // Usando um novo escopo de coroutine
         CoroutineScope(Dispatchers.IO).launch {
             fileUris.forEach { fileRef ->
                 try {
