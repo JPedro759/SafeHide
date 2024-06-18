@@ -47,7 +47,7 @@ object CryptographyService {
     private fun saveMasterKeyToFirestore(uid: String, masterKey: SecretKey) {
         val masterKeyData = hashMapOf("uid" to uid, "masterKey" to masterKey.encoded.toBase64())
 
-        firestore.collection("masterKeys").add(masterKeyData)
+        firestore.collection("masterKeys").document(uid).set(masterKeyData)
             .addOnSuccessListener {
                 Log.d("Firestore", "Master key saved successfully")
             }
@@ -231,26 +231,25 @@ object CryptographyService {
                             val gcmSpec = GCMParameterSpec(128, iv)
                             cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmSpec)
 
-                            val outputFile =
-                                File(tempFile.path.removeSuffix(".encrypted") + ".decrypted")
+                            val outputFile = File(tempFile.path.removeSuffix(".encrypted"))
                             FileOutputStream(outputFile).use { outputStream ->
                                 val buffer = ByteArray(1024)
                                 var bytesRead: Int
-                                while (inputFile.read(buffer).also { bytesRead = it } != -1) {
+                                while (inputFile.read(buffer).also { bytesRead = it }!= -1) {
                                     val decryptedBytes = cipher.update(buffer, 0, bytesRead)
-                                    if (decryptedBytes != null) {
+                                    if (decryptedBytes!= null) {
                                         outputStream.write(decryptedBytes)
                                     }
                                 }
                                 val finalBytes = cipher.doFinal()
-                                if (finalBytes != null) {
+                                if (finalBytes!= null) {
                                     outputStream.write(finalBytes)
                                 }
                             }
 
                             val decryptedUri = Uri.fromFile(outputFile)
                             decryptedFiles.add(decryptedUri)
-                            tempFile.delete()
+                            tempFile.delete() // Delete the original encrypted file
                         }
                     }
                 } catch (e: Exception) {
