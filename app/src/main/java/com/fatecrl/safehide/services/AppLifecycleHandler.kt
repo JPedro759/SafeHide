@@ -9,18 +9,21 @@ import com.fatecrl.safehide.LockScreenActivity
 
 class AppLifecycleHandler : Application.ActivityLifecycleCallbacks {
 
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
-
-    override fun onActivityStarted(activity: Activity) {
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         LockScreenActivity.isEmailCorrect = false
     }
+
+    override fun onActivityStarted(activity: Activity) {}
 
     override fun onActivityResumed(activity: Activity) {}
 
     override fun onActivityPaused(activity: Activity) {}
 
     override fun onActivityStopped(activity: Activity) {
+        Log.d("TAG", "Password: ${LockScreenActivity.isPasswordCorrect}")
+
         if (!LockScreenActivity.isPasswordCorrect) {
+            Log.d("TAG", "Email: ${LockScreenActivity.isEmailCorrect}")
             if (activity is LockScreenActivity && !LockScreenActivity.isEmailCorrect) {
                 val lockScreenIntent = Intent(activity, LockScreenActivity::class.java)
                 lockScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
