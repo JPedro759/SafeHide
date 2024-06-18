@@ -138,7 +138,7 @@ object CryptographyService {
                 val gcmSpec = GCMParameterSpec(128, iv)
                 cipher.init(Cipher.ENCRYPT_MODE, secretKey, gcmSpec)
 
-                val uniqueFileName = UUID.randomUUID().toString() + ".encrypted"
+                val uniqueFileName = UUID.randomUUID().toString()
                 val outputFile = File(context.cacheDir, uniqueFileName)
                 FileInputStream(tempFile).use { inputFile ->
                     FileOutputStream(outputFile).use { outputStream ->
