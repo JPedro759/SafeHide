@@ -106,47 +106,62 @@ object CryptographyUtils {
     }
 
     fun downloadEncryptedFiles(context: Context) {
-        // Diretório de Downloads da galeria
         val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val tempDir = File(context.filesDir, ".encrypted_files")
+
+        // Cria a pasta temporária se ela não existir
+        if (!tempDir.exists()) {
+            tempDir.mkdirs()
+        }
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val fileNames = getFilesFromCloudStorage()
                 Log.d("TAG", "Files to download: $fileNames")
 
+                // Lista os arquivos já presentes na pasta temporária local
+                val localFileNames = tempDir.listFiles()?.map { it.name } ?: emptyList()
+                Log.d("TAG", "Local encrypted files: $localFileNames")
+
+                // Baixa os arquivos do Cloud Storage para a pasta temporária
                 for (fileName in fileNames) {
                     val encryptedFileRef = storage.reference.child("encrypted_files/$fileName")
-                    Log.d("TAG", "File path: $encryptedFileRef")
+                    val tempFile = File(tempDir, fileName)
 
-                    // Fetch the fileId from Firestore
+                    // Baixa o arquivo apenas se ele ainda não estiver na pasta temporária local
+                    if (!localFileNames.contains(fileName)) {
+                        encryptedFileRef.getFile(tempFile).await()
+                        Log.d("TAG", "Downloaded file: ${tempFile.absolutePath}")
+                    }
+
+                    // Obtém o fileId do arquivo para descriptografia
                     val fileId = getFileId(fileName)
-
                     if (fileId == null) {
                         Log.e("TAG", "File ID not found for fileName: $fileName")
                         continue
                     }
 
-                    Log.d("TAG", "File ID found for fileName: $fileName")
-
-                    // Passa o URI do Cloud Storage diretamente para a função de descriptografia
+                    // Descriptografa o arquivo
                     val decryptedUris = decryptMediaFiles(listOf(encryptedFileRef), context, fileId)
                     Log.d("TAG", "Decrypted URIs: $decryptedUris")
 
+                    // Move os arquivos descriptografados para a pasta de Downloads
                     decryptedUris.forEach { decryptedUri ->
                         val outputFile = File(downloadDir, fileName.removeSuffix(".encrypted"))
-                        Log.d("TAG", "Decrypting file: ${decryptedUri.path}")
-
                         decryptedUri.path?.let { filePath ->
                             val decryptedFile = File(filePath)
                             decryptedFile.copyTo(outputFile, overwrite = true)
-
-                            Log.d("TAG", "Arquivo descriptografado salvo em: ${outputFile.absolutePath}")
+                            Log.d("TAG", "Decrypted file saved to: ${outputFile.absolutePath}")
                         }
                     }
                 }
+
+                // Limpa a pasta temporária após descriptografar os arquivos
+                tempDir.listFiles()?.forEach { it.delete() }
+                Log.d("TAG", "Temporary files deleted")
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.e("TAG", "Erro ao obter nomes de arquivos do Cloud Storage", e)
+                Log.e("TAG", "Error downloading or decrypting files", e)
             }
         }
     }

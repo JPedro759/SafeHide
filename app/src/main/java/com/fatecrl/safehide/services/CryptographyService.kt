@@ -1,5 +1,6 @@
 package com.fatecrl.safehide.services
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.Build
@@ -24,6 +25,7 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object CryptographyService {
@@ -73,12 +75,14 @@ object CryptographyService {
         }
     }
 
+    @SuppressLint("GetInstance")
     private fun encryptKey(fileKey: SecretKey, masterKey: SecretKey): ByteArray {
         val cipher = Cipher.getInstance("AES")
         cipher.init(Cipher.WRAP_MODE, masterKey)
         return cipher.wrap(fileKey)
     }
 
+    @SuppressLint("GetInstance")
     private fun decryptKey(encryptedKey: ByteArray, masterKey: SecretKey): SecretKey {
         val cipher = Cipher.getInstance("AES")
         cipher.init(Cipher.UNWRAP_MODE, masterKey)
@@ -139,7 +143,8 @@ object CryptographyService {
                 cipher.init(Cipher.ENCRYPT_MODE, secretKey, gcmSpec)
 
                 val uniqueFileName = UUID.randomUUID().toString()
-                val outputFile = File(context.cacheDir, uniqueFileName)
+                val outputFile = File(context.filesDir, ".encrypted_files/$uniqueFileName")
+                outputFile.parentFile?.mkdirs() // Certifique-se de que o diretório existe
                 FileInputStream(tempFile).use { inputFile ->
                     FileOutputStream(outputFile).use { outputStream ->
                         outputStream.write(iv)
@@ -175,23 +180,31 @@ object CryptographyService {
     fun decryptMediaFiles(fileUris: List<StorageReference>, context: Context, fileId: String): List<Uri> {
         val decryptedFiles = mutableListOf<Uri>()
         val uid = auth.currentUser?.uid
-
         val latch = CountDownLatch(fileUris.size)
 
         CoroutineScope(Dispatchers.IO).launch {
             fileUris.forEach { fileRef ->
                 try {
-                    val encryptedBytes = fileRef.getBytes(Long.MAX_VALUE).await() // await() para esperar a conclusão assíncrona
+                    val encryptedBytes = fileRef.getBytes(Long.MAX_VALUE).await()
 
-                    val tempFile = File.createTempFile("temp", ".encrypted", context.cacheDir)
+                    // Create a temporary file to store the encrypted data
+                    val tempFile = File(context.filesDir, ".encrypted_files/${fileRef.name}")
                     tempFile.writeBytes(encryptedBytes)
 
                     Log.d("TAG", "Temp file created: ${tempFile.absolutePath}")
 
+                    // Get the IV from the encrypted file (first 12 bytes)
+                    val ivBytes = encryptedBytes.copyOfRange(0, 12)
+                    val iv = IvParameterSpec(ivBytes)
+
+                    // Store the IV securely
+                    val secureStorage = SecureStorage(context)
+                    secureStorage.storeIv(fileRef.name, ivBytes)
+
                     val documents = firestore.collection("keys")
                         .whereEqualTo("uid", uid)
                         .whereEqualTo("fileId", fileId)
-                        .get().await() // await() para esperar a conclusão assíncrona
+                        .get().await()
 
                     if (documents.isEmpty) {
                         Log.e("Firestore", "No documents found for fileId: $fileId")
@@ -204,16 +217,15 @@ object CryptographyService {
                         val encryptedFileKey = document.getString("encryptedKey")?.fromBase64()
                         Log.d("TAG", "Encrypted File Key: ${Base64.encodeToString(encryptedFileKey, Base64.DEFAULT)}")
                         if (encryptedFileKey == null) {
-                            Log.e(
-                                "Firestore",
-                                "No encryptedFileKey found for document: ${document.id}"
-                            )
+                            Log.e("Firestore", "No encryptedFileKey found for document: ${document.id}")
                             tempFile.delete()
                             latch.countDown()
                             continue
                         }
 
                         val masterKey = getMasterKey(uid!!)
+                        Log.d("TAG", "Master Key: ${Base64.encodeToString(masterKey?.encoded, Base64.DEFAULT)}")
+
                         if (masterKey == null) {
                             Log.e("Firestore", "Master key not found for uid: $uid")
                             tempFile.delete()
@@ -224,33 +236,35 @@ object CryptographyService {
                         val secretKey = decryptKey(encryptedFileKey, masterKey)
                         Log.d("TAG", "Decrypted Secret Key: ${Base64.encodeToString(secretKey.encoded, Base64.DEFAULT)}")
 
-                        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-                        val iv = ByteArray(12)
-                        FileInputStream(tempFile).use { inputFile ->
-                            inputFile.read(iv)
-                            val gcmSpec = GCMParameterSpec(128, iv)
-                            cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmSpec)
+                        // Retrieve the IV from secure storage
+                        val storedIvBytes = secureStorage.getIv(fileRef.name)
+                        val gcmSpec = GCMParameterSpec(128, storedIvBytes)
 
-                            val outputFile = File(tempFile.path.removeSuffix(".encrypted"))
-                            FileOutputStream(outputFile).use { outputStream ->
-                                val buffer = ByteArray(1024)
-                                var bytesRead: Int
-                                while (inputFile.read(buffer).also { bytesRead = it }!= -1) {
+                        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                        cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmSpec)
+
+                        val outputFile = File(tempFile.path + ".decrypted")
+                        FileOutputStream(outputFile).use { outputStream ->
+                            val buffer = ByteArray(1024)
+                            var bytesRead: Int
+                            FileInputStream(tempFile).use { inputFile ->
+                                inputFile.skip(12) // Skip the IV
+                                while (inputFile.read(buffer).also { bytesRead = it } != -1) {
                                     val decryptedBytes = cipher.update(buffer, 0, bytesRead)
-                                    if (decryptedBytes!= null) {
+                                    if (decryptedBytes != null) {
                                         outputStream.write(decryptedBytes)
                                     }
                                 }
-                                val finalBytes = cipher.doFinal()
-                                if (finalBytes!= null) {
+                                val finalBytes =cipher.doFinal()
+                                if (finalBytes != null) {
                                     outputStream.write(finalBytes)
                                 }
                             }
-
-                            val decryptedUri = Uri.fromFile(outputFile)
-                            decryptedFiles.add(decryptedUri)
-                            tempFile.delete() // Delete the original encrypted file
                         }
+
+                        val decryptedUri = Uri.fromFile(outputFile)
+                        decryptedFiles.add(decryptedUri)
+                        tempFile.delete() // Delete the original encrypted file
                     }
                 } catch (e: Exception) {
                     Log.e("TAG", "Error decrypting file", e)
@@ -261,7 +275,25 @@ object CryptographyService {
         }
 
         latch.await()
-
         return decryptedFiles
+    }
+
+    class SecureStorage(context: Context) {
+        private val sharedPreferences = context.getSharedPreferences("secure_storage", Context.MODE_PRIVATE)
+
+        fun storeIv(fileName: String, ivBytes: ByteArray) {
+            val editor = sharedPreferences.edit()
+            editor.putString(fileName, Base64.encodeToString(ivBytes, Base64.DEFAULT))
+            editor.apply()
+        }
+
+        fun getIv(fileName: String): ByteArray? {
+            val storedIv = sharedPreferences.getString(fileName, null)
+            return if (storedIv != null) {
+                Base64.decode(storedIv, Base64.DEFAULT)
+            } else {
+                null
+            }
+        }
     }
 }
