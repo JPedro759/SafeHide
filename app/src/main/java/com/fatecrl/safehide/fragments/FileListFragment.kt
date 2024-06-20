@@ -14,7 +14,6 @@ class FileListFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private val fileAdapter = FileAdapter()
 
-    // Método para definir o adaptador a ser usado
     fun setAdapter(adapter: FileAdapter) {
         recyclerView.adapter = adapter
     }

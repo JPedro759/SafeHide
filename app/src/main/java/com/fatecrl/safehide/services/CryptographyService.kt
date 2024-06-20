@@ -21,6 +21,7 @@ import java.io.FileOutputStream
 import java.security.SecureRandom
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
+import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -193,14 +194,15 @@ object CryptographyService {
 
                     Log.d("TAG", "Temp file created: ${tempFile.absolutePath}")
 
-                    // Get the IV from the encrypted file (first 12 bytes)
+                    // Extract IV from the encrypted file (first 12 bytes)
                     val ivBytes = encryptedBytes.copyOfRange(0, 12)
                     val iv = IvParameterSpec(ivBytes)
 
-                    // Store the IV securely
+                    // Store IV securely
                     val secureStorage = SecureStorage(context)
                     secureStorage.storeIv(fileRef.name, ivBytes)
 
+                    // Retrieve encrypted key from Firestore
                     val documents = firestore.collection("keys")
                         .whereEqualTo("uid", uid)
                         .whereEqualTo("fileId", fileId)
@@ -236,7 +238,7 @@ object CryptographyService {
                         val secretKey = decryptKey(encryptedFileKey, masterKey)
                         Log.d("TAG", "Decrypted Secret Key: ${Base64.encodeToString(secretKey.encoded, Base64.DEFAULT)}")
 
-                        // Retrieve the IV from secure storage
+                        // Retrieve IV from secure storage
                         val storedIvBytes = secureStorage.getIv(fileRef.name)
                         val gcmSpec = GCMParameterSpec(128, storedIvBytes)
 
@@ -247,18 +249,19 @@ object CryptographyService {
                         FileOutputStream(outputFile).use { outputStream ->
                             val buffer = ByteArray(1024)
                             var bytesRead: Int
+
                             FileInputStream(tempFile).use { inputFile ->
                                 inputFile.skip(12) // Skip the IV
+
                                 while (inputFile.read(buffer).also { bytesRead = it } != -1) {
                                     val decryptedBytes = cipher.update(buffer, 0, bytesRead)
-                                    if (decryptedBytes != null) {
-                                        outputStream.write(decryptedBytes)
-                                    }
+
+                                    if (decryptedBytes != null) outputStream.write(decryptedBytes)
                                 }
-                                val finalBytes =cipher.doFinal()
-                                if (finalBytes != null) {
-                                    outputStream.write(finalBytes)
-                                }
+
+                                val finalBytes = cipher.doFinal()
+
+                                if (finalBytes != null) outputStream.write(finalBytes)
                             }
                         }
 
@@ -266,8 +269,12 @@ object CryptographyService {
                         decryptedFiles.add(decryptedUri)
                         tempFile.delete() // Delete the original encrypted file
                     }
+                } catch (e: AEADBadTagException) {
+                    Log.e("TAG", "AEADBadTagException: Invalid authentication tag", e)
+                    latch.countDown()
                 } catch (e: Exception) {
                     Log.e("TAG", "Error decrypting file", e)
+                    latch.countDown()
                 } finally {
                     latch.countDown()
                 }
@@ -275,6 +282,7 @@ object CryptographyService {
         }
 
         latch.await()
+
         return decryptedFiles
     }
 
@@ -289,7 +297,7 @@ object CryptographyService {
 
         fun getIv(fileName: String): ByteArray? {
             val storedIv = sharedPreferences.getString(fileName, null)
-            return if (storedIv != null) {
+            return if (storedIv!= null) {
                 Base64.decode(storedIv, Base64.DEFAULT)
             } else {
                 null
