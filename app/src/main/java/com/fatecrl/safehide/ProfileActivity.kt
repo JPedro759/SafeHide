@@ -3,6 +3,8 @@ package com.fatecrl.safehide
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +18,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private lateinit var binding: ProfilePageBinding
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ProfilePageBinding.inflate(layoutInflater)
@@ -76,6 +79,14 @@ class ProfileActivity : AppCompatActivity() {
 
             btnDownloadMedia.setOnClickListener {
                 downloadEncryptedFiles(this@ProfileActivity)
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    Toast.makeText(
+                        this@ProfileActivity,
+                        "Arquivos baixados com sucesso!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }, 5000)
             }
 
             btnLogout.setOnClickListener {

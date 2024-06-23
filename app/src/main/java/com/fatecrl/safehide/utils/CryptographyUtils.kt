@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import com.fatecrl.safehide.services.CryptographyService.decryptMediaFiles
@@ -26,7 +27,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.file.Files
-import java.security.MessageDigest
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -127,7 +127,6 @@ object CryptographyUtils {
                 val localFileNames = tempDir.listFiles()?.map { it.name } ?: emptyList()
                 Log.d("DownloadProcess", "Local encrypted files: $localFileNames")
 
-                // Baixa os arquivos do Cloud Storage para a pasta temporária
                 for (fileName in fileNames) {
                     val encryptedFileRef = storage.reference.child("encrypted_files/$fileName")
                     val tempFile = File(tempDir, fileName)
@@ -138,21 +137,18 @@ object CryptographyUtils {
                         downloadFileInChunks(encryptedFileRef, tempFile)
                         Log.d("DownloadProcess", "Downloaded file: ${tempFile.absolutePath}")
 
-                        // Verifica o tamanho e formato do arquivo baixado
                         val fileSize = tempFile.length()
                         val fileFormat = getFileFormat(tempFile)
                         Log.d("DownloadProcess", "Downloaded file size: $fileSize bytes")
                         Log.d("DownloadProcess", "Downloaded file format: $fileFormat")
                     }
 
-                    // Obtém o arquivo para descriptografia
                     val file = getFileName(fileName)
                     if (file == null) {
                         Log.e("DownloadProcess", "File not found: $fileName")
                         continue
                     }
 
-                    // Descriptografa o arquivo
                     Log.d("DownloadProcess", "Decrypting file: $fileName")
                     val decryptedUris = decryptMediaFiles(listOf(tempFile.toUri()), context, file)
                     Log.d("DownloadProcess", "Decrypted URIs: $decryptedUris")
