@@ -35,11 +35,8 @@ object CryptographyUtils {
     private fun uploadFileToStorage(uri: Uri): StorageTask<UploadTask.TaskSnapshot> {
         val storageRef = storage.reference.child("encrypted_files/${uri.lastPathSegment}")
         val file = File(uri.path!!)
-
-        val md5Hash = calculateMD5(file).toHexString()
         val metadata = StorageMetadata.Builder()
             .setContentType("application/octet-stream")
-            .setCustomMetadata("md5Hash", md5Hash)
             .build()
 
         val inputStream = FileInputStream(file)
@@ -49,26 +46,8 @@ object CryptographyUtils {
                 println("File uploaded successfully: ${it.metadata?.path}")
             }
             .addOnFailureListener { exception ->
-                println("File uploaded failed: $exception")
+                println("File upload failed: $exception")
             }
-    }
-
-    private fun calculateMD5(file: File): ByteArray {
-        val digest = MessageDigest.getInstance("MD5")
-        FileInputStream(file).use { input ->
-            val buffer = ByteArray(8192)
-            var bytesRead = input.read(buffer)
-            while (bytesRead != -1) {
-                digest.update(buffer, 0, bytesRead)
-                bytesRead = input.read(buffer)
-            }
-        }
-        return digest.digest()
-    }
-
-    private fun verifyMD5(file: File, expectedMD5: String): Boolean {
-        val actualMD5 = calculateMD5(file).toHexString()
-        return actualMD5 == expectedMD5
     }
 
     fun uploadEncryptedFiles(fileUris: List<Uri>, context: Context): Task<Void> {
@@ -81,29 +60,13 @@ object CryptographyUtils {
             val fileUploadTask = uploadFileToStorage(encryptedUri)
 
             fileUploadTask.addOnSuccessListener {
-                val cloudHashString = it.metadata?.md5Hash
-
                 Log.d("UploadProcess", "File uploaded: ${it.metadata?.path}")
-                Log.d("UploadProcess", "verifyMD5: ${cloudHashString?.let { 
-                    it1 -> verifyMD5(File(encryptedUri.path!!), it1) 
-                }}")
-
-                if (cloudHashString != null && verifyMD5(File(encryptedUri.path!!), cloudHashString)) {
-                    Log.d("UploadProcess", "File uploaded successfully and verified: ${it.metadata?.path}")
-                } else {
-                    Log.e("UploadProcess", "Hash verification failed after upload. File may be corrupted.")
-                    throw IOException("Hash verification failed after upload. File may be corrupted.")
-                }
             }.addOnFailureListener { exception ->
                 Log.e("UploadProcess", "File upload failed: ${exception.message}")
             }
         }
 
         return Tasks.whenAll(uploadTasks)
-    }
-
-    private fun ByteArray.toHexString(): String {
-        return joinToString("") { "%02x".format(it) }
     }
 
     private suspend fun getFilesFromCloudStorage(): List<String> {
@@ -225,14 +188,12 @@ object CryptographyUtils {
     @RequiresApi(Build.VERSION_CODES.O)
     private suspend fun downloadFileInChunks(fileRef: StorageReference, destFile: File, chunkSize: Long = 1024 * 1024) {
         var offset: Long = 0
-        val hash = MessageDigest.getInstance("MD5")
 
         destFile.outputStream().use { output ->
             while (true) {
                 val range = offset until offset + chunkSize
                 try {
                     val bytes = fileRef.getBytes(range.last).await()
-                    hash.update(bytes)
                     output.write(bytes)
                     offset += bytes.size
                     if (bytes.size < chunkSize) break // Último bloco foi menor que o chunkSize, download completo
@@ -243,35 +204,11 @@ object CryptographyUtils {
             }
         }
 
-        // Verifica se o hash do arquivo baixado corresponde ao hash esperado
-        val cloudHashString = fileRef.getMetadata().await().md5Hash
-        val localHash = hash.digest()
-
-        if (cloudHashString != null) {
-            val cloudHash = cloudHashString.hexStringToByteArray()
-
-            if (!cloudHash.contentEquals(localHash)) {
-                throw IOException("Hash verification failed. File may be corrupted.")
-            }
-        } else {
-            throw IOException("Cloud hash is null. Unable to verify file integrity.")
-        }
-
         // Verifica o tamanho e formato do arquivo baixado
         val fileSize = destFile.length()
         val fileFormat = getFileFormat(destFile)
         Log.d("TAG", "Downloaded file size: $fileSize bytes")
         Log.d("TAG", "Downloaded file format: $fileFormat")
-    }
-
-    private fun String.hexStringToByteArray(): ByteArray {
-        val result = ByteArray(length / 2)
-
-        for (i in indices step 2) {
-            result[i / 2] = ((Character.digit(this[i], 16) shl 4) + Character.digit(this[i + 1], 16)).toByte()
-        }
-
-        return result
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
