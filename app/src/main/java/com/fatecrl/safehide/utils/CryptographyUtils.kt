@@ -14,7 +14,6 @@ import com.fatecrl.safehide.services.FirebaseService.firestore
 import com.fatecrl.safehide.services.FirebaseService.storage
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.StorageMetadata
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.StorageTask
@@ -44,12 +43,13 @@ object CryptographyUtils {
             .build()
 
         val inputStream = FileInputStream(file)
+
         return storageRef.putStream(inputStream, metadata)
             .addOnSuccessListener {
                 println("File uploaded successfully: ${it.metadata?.path}")
             }
             .addOnFailureListener { exception ->
-                // Handle failure
+                println("File uploaded failed: $exception")
             }
     }
 
@@ -84,10 +84,8 @@ object CryptographyUtils {
                 val cloudHashString = it.metadata?.md5Hash
 
                 Log.d("UploadProcess", "File uploaded: ${it.metadata?.path}")
-                Log.d("UploadProcess", "verifyMD5: ${cloudHashString?.let { it1 ->
-                    verifyMD5(File(encryptedUri.path!!),
-                        it1
-                    )
+                Log.d("UploadProcess", "verifyMD5: ${cloudHashString?.let { 
+                    it1 -> verifyMD5(File(encryptedUri.path!!), it1) 
                 }}")
 
                 if (cloudHashString != null && verifyMD5(File(encryptedUri.path!!), cloudHashString)) {
@@ -133,13 +131,13 @@ object CryptographyUtils {
         }
     }
 
-    private fun getFileId(fileName: String): String? {
+    private fun getFileName(fileName: String): String? {
         return try {
             val document = Tasks.await(firestore.collection("keys")
                 .whereEqualTo("fileName", fileName)
                 .get()).documents.firstOrNull()
 
-            document?.getString("fileId")
+            document?.getString("fileName")
         } catch (e: Exception) {
             Log.e("TAG", "Error fetching fileId from Firestore", e)
             null
@@ -184,21 +182,22 @@ object CryptographyUtils {
                         Log.d("DownloadProcess", "Downloaded file format: $fileFormat")
                     }
 
-                    // Obtém o fileId do arquivo para descriptografia
-                    val fileId = getFileId(fileName)
-                    if (fileId == null) {
-                        Log.e("DownloadProcess", "File ID not found for fileName: $fileName")
+                    // Obtém o arquivo para descriptografia
+                    val file = getFileName(fileName)
+                    if (file == null) {
+                        Log.e("DownloadProcess", "File not found: $fileName")
                         continue
                     }
 
                     // Descriptografa o arquivo
                     Log.d("DownloadProcess", "Decrypting file: $fileName")
-                    val decryptedUris = decryptMediaFiles(listOf(tempFile.toUri()), context, fileId)
+                    val decryptedUris = decryptMediaFiles(listOf(tempFile.toUri()), context, file)
                     Log.d("DownloadProcess", "Decrypted URIs: $decryptedUris")
 
                     // Move os arquivos descriptografados para a pasta de Downloads
                     decryptedUris.forEach { decryptedUri ->
-                        val outputFile = File(downloadDir, fileName.removeSuffix(".bin"))
+                        val outputFile = File(downloadDir, fileName)
+
                         decryptedUri.path?.let { filePath ->
                             val decryptedFile = File(filePath)
                             decryptedFile.copyTo(outputFile, overwrite = true)

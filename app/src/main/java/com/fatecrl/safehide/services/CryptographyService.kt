@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.Build
-import android.provider.OpenableColumns
 import android.util.Base64
 import android.util.Log
 import com.fatecrl.safehide.services.FirebaseService.auth
@@ -18,11 +17,9 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.security.SecureRandom
-import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import javax.crypto.AEADBadTagException
 import javax.crypto.Cipher
@@ -122,53 +119,83 @@ object CryptographyService {
         val uid = auth.currentUser?.uid
 
         // Salva a chave mestra no Firestore
-        if (uid != null) {
-            saveMasterKeyToFirestore(uid, masterKey)
-        }
+        if (uid != null) saveMasterKeyToFirestore(uid, masterKey)
+
+        val secureStorage = SecureStorage(context)
 
         fileUris.forEach { fileUri ->
             val inputStream = context.contentResolver.openInputStream(fileUri)
 
             inputStream?.use { input ->
                 val byteArray = input.readBytes()
+                Log.d("Encryption", "byteArray: ${byteArray.toBase64()}")
+
                 val tempFile = File(context.cacheDir, "tempFile")
                 tempFile.writeBytes(byteArray)
 
-                val secretKey = generateEncryptionKey()
+                Log.d("Encryption", "Temp file created: ${tempFile.absolutePath}")
 
-                val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                val secretKey = generateEncryptionKey()
+                val cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC")
                 val iv = ByteArray(12)
                 SecureRandom().nextBytes(iv)
+
+                Log.d("Encryption", "Generated IV: ${Base64.encodeToString(iv, Base64.DEFAULT)}")
+
                 val gcmSpec = GCMParameterSpec(128, iv)
+
+                Log.d("Encryption", "GCMSpec: $gcmSpec")
+
                 cipher.init(Cipher.ENCRYPT_MODE, secretKey, gcmSpec)
 
                 val outputFile = fileUri.lastPathSegment?.let { File(context.filesDir, it) }
+                Log.d("Encryption", "Output File: $outputFile")
+
                 outputFile?.parentFile?.mkdirs() // Certifique-se de que o diretório existe
-                FileInputStream(tempFile).use { inputFile ->
-                    FileOutputStream(outputFile).use { outputStream ->
-                        outputStream.write(iv)
-                        val buffer = ByteArray(1024)
-                        var bytesRead: Int
-                        while (inputFile.read(buffer).also { bytesRead = it } != -1) {
-                            val encryptedBytes = cipher.update(buffer, 0, bytesRead)
-                            outputStream.write(encryptedBytes)
-                        }
-                        val finalBytes = cipher.doFinal()
-                        outputStream.write(finalBytes)
-                    }
+
+                val outputStream = FileOutputStream(outputFile)
+                Log.d("Encryption", "Output Stream: $outputStream")
+
+                outputStream.write(iv) // Write IV to output file
+
+                // Armazena o IV usando SecureStorage
+                fileUri.lastPathSegment?.let { secureStorage.storeIv(it, iv) }
+
+                val buffer = ByteArray(1024)
+                var bytesRead: Int
+
+                Log.d("Encryption", "Buffer: $buffer")
+
+                val inputStream = context.contentResolver.openInputStream(fileUri)
+
+                if (inputStream == null) Log.e("Encryption", "Failed to open inputStream for URI: $fileUri")
+                else Log.d("Encryption", "Successfully opened inputStream for URI: $fileUri")
+
+                while (inputStream!!.read(buffer).also { bytesRead = it }!= -1) {
+                    Log.d("Encryption", "Buffer read: ${buffer.take(bytesRead).toByteArray().toBase64()}")
+
+                    val encryptedBytes = cipher.update(buffer, 0, bytesRead)
+                    outputStream.write(encryptedBytes)
                 }
+
+                val finalBytes = cipher.doFinal()
+                Log.d("Encryption", "Encrypted Bytes: ${finalBytes?.toBase64()}")
+
+                outputStream.write(finalBytes)
+
+                outputStream.close()
 
                 val encryptedFileKey = encryptKey(secretKey, masterKey)
-                val encryptedUri = Uri.fromFile(outputFile)
-                encryptedFiles.add(encryptedUri)
+                Log.w("Encryption", "Encrypted File Key: ${Base64.encodeToString(encryptedFileKey, Base64.DEFAULT)}")
 
-                if (uid != null) {
-                    saveKeyToFirestore(
-                        uid,
-                        encryptedFileKey,
-                        "${fileUri.lastPathSegment}"
-                    )
-                }
+                val encryptedUri = Uri.fromFile(outputFile)
+                Log.w("TAG", "Encrypted URI: $encryptedUri")
+
+                encryptedFiles.add(encryptedUri)
+                Log.w("TAG", "Encrypted Files: $encryptedFiles")
+
+                if (uid!= null)
+                    saveKeyToFirestore(uid, encryptedFileKey, "${fileUri.lastPathSegment}")
 
                 println("Arquivo criptografado com sucesso: $fileUri")
             }
@@ -178,16 +205,25 @@ object CryptographyService {
     }
 
     private fun getBytesFromUri(uri: Uri, context: Context): ByteArray {
+        Log.d("getBytesFromUri", "URI: $uri")
+
         return context.contentResolver.openInputStream(uri)?.use { inputStream ->
             val buffer = ByteArrayOutputStream()
+            Log.d("getBytesFromUri", "buffer: $buffer")
+
             val data = ByteArray(1024)
+            Log.d("getBytesFromUri", "data: $data")
+
             var nRead: Int
 
             while (inputStream.read(data, 0, data.size).also { nRead = it } != -1) {
                 buffer.write(data, 0, nRead)
+                Log.d("getBytesFromUri", "nRead: $nRead")
             }
 
+
             buffer.flush()
+            Log.d("getBytesFromUri", "buffer: $buffer")
             buffer.toByteArray()
         } ?: throw IOException("Unable to open InputStream for URI: $uri")
     }
@@ -197,24 +233,25 @@ object CryptographyService {
         val uid = auth.currentUser?.uid
         val latch = CountDownLatch(fileUris.size)
 
+        val secureStorage = SecureStorage(context)
+
         CoroutineScope(Dispatchers.IO).launch {
             fileUris.forEach { uri ->
                 try {
                     val encryptedBytes = getBytesFromUri(uri, context)
 
-                    // Create a temporary file to store the encrypted data
-                    val tempFileName = "encrypted_${System.currentTimeMillis()}"
-                    val tempFile = File(context.filesDir, ".encrypted_files/$tempFileName")
+                    val tempFile = File(context.filesDir, ".encrypted_files/${uri.lastPathSegment}")
+
+                    if (!tempFile.exists()) tempFile.mkdirs()
+
                     tempFile.writeBytes(encryptedBytes)
 
                     Log.d("TAG", "Temp file created: ${tempFile.absolutePath}")
 
-                    // Extract IV from the encrypted file (first 12 bytes)
-                    val ivBytes = encryptedBytes.copyOfRange(0, 12)
+                    // Extract IV from secure storage
+                    val ivBytes = uri.lastPathSegment?.let { secureStorage.getIv(it) }
 
-                    // Store IV securely
-                    val secureStorage = SecureStorage(context)
-                    secureStorage.storeIv(tempFileName, ivBytes)
+                    Log.d("Decryption", "Extracted IV: ${Base64.encodeToString(ivBytes, Base64.DEFAULT)}")
 
                     // Retrieve encrypted key from Firestore
                     val documents = firestore.collection("keys")
@@ -254,27 +291,39 @@ object CryptographyService {
                         Log.d("TAG", "Decrypted Secret Key: ${Base64.encodeToString(secretKey.encoded, Base64.DEFAULT)}")
 
                         // Retrieve IV from secure storage
-                        val storedIvBytes = secureStorage.getIv(tempFileName)
+                        val storedIvBytes = uri.lastPathSegment?.let { secureStorage.getIv(it) }
+                        Log.d("Decryption", "Stored IV: ${Base64.encodeToString(storedIvBytes, Base64.DEFAULT)}")
+
                         val gcmSpec = GCMParameterSpec(128, storedIvBytes)
+                        Log.d("Decryption", "GCMSpec: $gcmSpec")
 
                         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
                         cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmSpec)
 
                         val outputFile = File(tempFile.path)
+
                         FileOutputStream(outputFile).use { outputStream ->
                             val buffer = ByteArray(1024)
                             var bytesRead: Int
 
-                            FileInputStream(tempFile).use { inputFile ->
+                            encryptedBytes.inputStream().use { inputFile ->
                                 inputFile.skip(12) // Skip the IV
 
                                 while (inputFile.read(buffer).also { bytesRead = it } != -1) {
+                                    Log.d(
+                                        "Decryption",
+                                        "Buffer read: ${buffer.take(bytesRead).toByteArray().toBase64()}"
+                                    ) // Log do Buffer
+
                                     val decryptedBytes = cipher.update(buffer, 0, bytesRead)
+
+                                    Log.d("Decryption", "Decrypted Bytes: ${decryptedBytes?.toBase64()}")
 
                                     if (decryptedBytes != null) outputStream.write(decryptedBytes)
                                 }
 
                                 val finalBytes = cipher.doFinal()
+                                Log.d("Decryption", "Final Bytes: ${finalBytes?.toBase64()}")
 
                                 if (finalBytes != null) outputStream.write(finalBytes)
                             }
@@ -282,7 +331,6 @@ object CryptographyService {
 
                         val decryptedUri = Uri.fromFile(outputFile)
                         decryptedFiles.add(decryptedUri)
-                        tempFile.delete() // Delete the original encrypted file
                     }
                 } catch (e: AEADBadTagException) {
                     Log.e("TAG", "AEADBadTagException: Invalid authentication tag", e)
@@ -312,11 +360,8 @@ object CryptographyService {
 
         fun getIv(fileName: String): ByteArray? {
             val storedIv = sharedPreferences.getString(fileName, null)
-            return if (storedIv!= null) {
-                Base64.decode(storedIv, Base64.DEFAULT)
-            } else {
-                null
-            }
+
+            return if (storedIv!= null) Base64.decode(storedIv, Base64.DEFAULT) else null
         }
     }
 }
