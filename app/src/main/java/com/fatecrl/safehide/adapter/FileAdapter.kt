@@ -3,6 +3,7 @@ package com.fatecrl.safehide.adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +22,6 @@ import com.google.firebase.database.ValueEventListener
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.UUID
 import javax.crypto.Cipher
@@ -61,7 +61,7 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
                 deleteListener?.onDeleteFile(fileUri)
 
                 currentItemView = holder.itemView
-                showFileDeletedMessage("Arquivo removido da lista!")
+                showFileDeletedMessage()
             }
         }
     }
@@ -116,9 +116,9 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
         return "$fileSizeInKB KB"
     }
 
-    private fun showFileDeletedMessage(message: String) {
+    private fun showFileDeletedMessage() {
         currentItemView?.let { view ->
-            val snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT)
+            val snackbar = Snackbar.make(view, "Arquivo removido da lista!", Snackbar.LENGTH_SHORT)
             val snackbarView = snackbar.view
             val messageTextView = snackbarView.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
 
@@ -189,47 +189,30 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
     }
 
     private fun saveFileToInternalStorage(fileUri: Uri, context: Context): Uri? {
-        val inputStream: InputStream? = context.contentResolver.openInputStream(fileUri)
+        val contentResolver = context.contentResolver
+        val fileName = contentResolver.query(fileUri, null, null, null, null)?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            cursor.moveToFirst()
+            cursor.getString(nameIndex)
+        }
+
+        val inputStream: InputStream? = contentResolver.openInputStream(fileUri)
 
         inputStream?.use { input ->
             val byteArray = input.readBytes()
-            val encryptedData = encryptData(byteArray)
-            val fileName = generateUniqueFileName()
 
             val directory = File(context.filesDir, ".files")
             if (!directory.exists()) directory.mkdirs()
 
-            val file = File(directory, fileName)
+            val file = fileName?.let { File(directory, it) }
             FileOutputStream(file).use { output ->
-                output.write(encryptedData)
+                output.write(byteArray)
             }
 
             return Uri.fromFile(file)
         }
 
         return null
-    }
-
-    private fun encryptData(data: ByteArray): ByteArray {
-        val secretKey = generateEncryptionKey()
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        val iv = ByteArray(12)
-        SecureRandom().nextBytes(iv)
-        val gcmSpec = GCMParameterSpec(128, iv)
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey, gcmSpec)
-
-        val encryptedData = cipher.doFinal(data)
-        return iv + encryptedData // Prepend the IV to the encrypted data
-    }
-
-    private fun generateUniqueFileName(): String {
-        return UUID.randomUUID().toString()
-    }
-
-    private fun generateEncryptionKey(): SecretKey {
-        val keyGen = KeyGenerator.getInstance("AES")
-        keyGen.init(256)
-        return keyGen.generateKey()
     }
 
     inner class FileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

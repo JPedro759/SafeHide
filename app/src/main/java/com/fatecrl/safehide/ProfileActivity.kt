@@ -1,8 +1,10 @@
 package com.fatecrl.safehide
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.fatecrl.safehide.databinding.ProfilePageBinding
 import com.fatecrl.safehide.model.User
@@ -12,7 +14,6 @@ import com.fatecrl.safehide.utils.CryptographyUtils.downloadEncryptedFiles
 
 class ProfileActivity : AppCompatActivity() {
 
-    // Declaração das variáveis de entrada de texto e botões
     private lateinit var binding: ProfilePageBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,26 +21,21 @@ class ProfileActivity : AppCompatActivity() {
         binding = ProfilePageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Obter o ID do usuário atualmente autenticado
         val userId = auth.currentUser?.uid
 
         binding.apply {
 
-            userId?.let {         // Se userId não for nulo, executa o bloco let
-                loadUserProfile(it)      // Passa o valor de userId (referenciado como it) para loadUserProfile
-            }
+            userId?.let { loadUserProfile(it) }
 
             setupListeners()
         }
     }
     private fun loadUserProfile(userId: String) {
-        // Referência ao nó do usuário específico no Realtime Database
         val userRef = database.reference.child("users").child(userId)
 
         userRef.get()
             .addOnSuccessListener { dataSnapshot ->
                 if (dataSnapshot.exists()) {
-                    // Convertendo o DataSnapshot para o objeto User
                     val user = dataSnapshot.getValue(User::class.java)
 
                     user?.let {
@@ -47,7 +43,6 @@ class ProfileActivity : AppCompatActivity() {
                         val email = it.email
                         val keySecret = it.secretPassword
 
-                        // Exibir os dados do perfil do usuário na interface do usuário
                         binding.apply {
                             userNameView.text = name
                             nameView.text = name
@@ -64,6 +59,7 @@ class ProfileActivity : AppCompatActivity() {
             }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun setupListeners() {
         binding.apply{
             btnBack.setOnClickListener {
@@ -83,15 +79,11 @@ class ProfileActivity : AppCompatActivity() {
             }
 
             btnLogout.setOnClickListener {
-                // Deslogar o usuário do FirebasAuth
                 auth.signOut()
 
-                // Limpar a pilha de atividades e evitar que o usuário volte para a tela de perfil
                 finishAffinity()
 
-                startActivity(
-                    Intent(this@ProfileActivity, LoginActivity::class.java)
-                )
+                startActivity(Intent(this@ProfileActivity, LoginActivity::class.java))
             }
         }
     }

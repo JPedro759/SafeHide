@@ -1,9 +1,13 @@
+
 package com.fatecrl.safehide.utils
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.core.net.toUri
 import com.fatecrl.safehide.services.CryptographyService.decryptMediaFiles
 import com.fatecrl.safehide.services.CryptographyService.encryptMediaFiles
 import com.fatecrl.safehide.services.FirebaseService.firestore
@@ -11,6 +15,8 @@ import com.fatecrl.safehide.services.FirebaseService.storage
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.storage.StorageException
+import com.google.firebase.storage.StorageMetadata
+import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.StorageTask
 import com.google.firebase.storage.UploadTask
 import kotlinx.coroutines.CoroutineScope
@@ -18,52 +24,88 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
-import java.util.UUID
+import java.nio.file.Files
+import java.security.MessageDigest
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 object CryptographyUtils {
-    private fun uploadFileToStorage(uri: Uri, path: String): StorageTask<UploadTask.TaskSnapshot> {
-        val storageRef = storage.reference.child(path)
+    private fun uploadFileToStorage(uri: Uri): StorageTask<UploadTask.TaskSnapshot> {
+        val storageRef = storage.reference.child("encrypted_files/${uri.lastPathSegment}")
+        val file = File(uri.path!!)
 
-        return storageRef.putFile(uri)
+        val md5Hash = calculateMD5(file).toHexString()
+        val metadata = StorageMetadata.Builder()
+            .setContentType("application/octet-stream")
+            .setCustomMetadata("md5Hash", md5Hash)
+            .build()
+
+        val inputStream = FileInputStream(file)
+        return storageRef.putStream(inputStream, metadata)
             .addOnSuccessListener {
                 println("File uploaded successfully: ${it.metadata?.path}")
             }
             .addOnFailureListener { exception ->
-                when (exception) {
-                    is StorageException -> {
-                        when (exception.errorCode) {
-                            StorageException.ERROR_RETRY_LIMIT_EXCEEDED -> println("Retry limit exceeded.")
-                            StorageException.ERROR_NOT_AUTHORIZED -> println("User not authorized.")
-                            StorageException.ERROR_CANCELED -> println("Upload canceled.")
-                            StorageException.ERROR_UNKNOWN -> println("Unknown error occurred.")
-
-                            else -> println("Storage exception: ${exception.message}")
-                        }
-                    }
-                    is IOException -> {
-                        println("IOException: The server has terminated the upload session")
-                    }
-                    else -> {
-                        println("File upload failed: ${exception.message}")
-                    }
-                }
+                // Handle failure
             }
     }
 
+    private fun calculateMD5(file: File): ByteArray {
+        val digest = MessageDigest.getInstance("MD5")
+        FileInputStream(file).use { input ->
+            val buffer = ByteArray(8192)
+            var bytesRead = input.read(buffer)
+            while (bytesRead != -1) {
+                digest.update(buffer, 0, bytesRead)
+                bytesRead = input.read(buffer)
+            }
+        }
+        return digest.digest()
+    }
+
+    private fun verifyMD5(file: File, expectedMD5: String): Boolean {
+        val actualMD5 = calculateMD5(file).toHexString()
+        return actualMD5 == expectedMD5
+    }
+
     fun uploadEncryptedFiles(fileUris: List<Uri>, context: Context): Task<Void> {
+        Log.d("UploadProcess", "Iniciando upload de arquivos criptografados")
         val encryptedFiles = encryptMediaFiles(fileUris, context)
+        Log.w("UploadProcess", "Arquivos criptografados: $encryptedFiles")
 
-        val uploadTasks = encryptedFiles.map { (encryptedUri, fileName) ->
-            val fileUploadTask = uploadFileToStorage(encryptedUri, "encrypted_files/$fileName")
+        val uploadTasks = encryptedFiles.map { encryptedUri ->
+            Log.d("UploadProcess", "Uploading file")
+            val fileUploadTask = uploadFileToStorage(encryptedUri)
 
-            fileUploadTask
+            fileUploadTask.addOnSuccessListener {
+                val cloudHashString = it.metadata?.md5Hash
+
+                Log.d("UploadProcess", "File uploaded: ${it.metadata?.path}")
+                Log.d("UploadProcess", "verifyMD5: ${cloudHashString?.let { it1 ->
+                    verifyMD5(File(encryptedUri.path!!),
+                        it1
+                    )
+                }}")
+
+                if (cloudHashString != null && verifyMD5(File(encryptedUri.path!!), cloudHashString)) {
+                    Log.d("UploadProcess", "File uploaded successfully and verified: ${it.metadata?.path}")
+                } else {
+                    Log.e("UploadProcess", "Hash verification failed after upload. File may be corrupted.")
+                    throw IOException("Hash verification failed after upload. File may be corrupted.")
+                }
+            }.addOnFailureListener { exception ->
+                Log.e("UploadProcess", "File upload failed: ${exception.message}")
+            }
         }
 
         return Tasks.whenAll(uploadTasks)
+    }
+
+    private fun ByteArray.toHexString(): String {
+        return joinToString("") { "%02x".format(it) }
     }
 
     private suspend fun getFilesFromCloudStorage(): List<String> {
@@ -71,7 +113,6 @@ object CryptographyUtils {
             val filesList = mutableListOf<String>()
 
             storage.reference.child("encrypted_files").listAll().addOnSuccessListener { listResult ->
-                Log.d("TAG", "listAll() successful")
                 Log.d("TAG", "Number of files found: ${listResult.items.size}")
 
                 if (listResult.items.isEmpty()) {
@@ -105,6 +146,7 @@ object CryptographyUtils {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun downloadEncryptedFiles(context: Context) {
         val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val tempDir = File(context.filesDir, ".encrypted_files")
@@ -116,12 +158,13 @@ object CryptographyUtils {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                Log.d("DownloadProcess", "Fetching files from cloud storage")
                 val fileNames = getFilesFromCloudStorage()
-                Log.d("TAG", "Files to download: $fileNames")
+                Log.d("DownloadProcess", "Files to download: $fileNames")
 
                 // Lista os arquivos já presentes na pasta temporária local
                 val localFileNames = tempDir.listFiles()?.map { it.name } ?: emptyList()
-                Log.d("TAG", "Local encrypted files: $localFileNames")
+                Log.d("DownloadProcess", "Local encrypted files: $localFileNames")
 
                 // Baixa os arquivos do Cloud Storage para a pasta temporária
                 for (fileName in fileNames) {
@@ -130,39 +173,114 @@ object CryptographyUtils {
 
                     // Baixa o arquivo apenas se ele ainda não estiver na pasta temporária local
                     if (!localFileNames.contains(fileName)) {
-                        encryptedFileRef.getFile(tempFile).await()
-                        Log.d("TAG", "Downloaded file: ${tempFile.absolutePath}")
+                        Log.d("DownloadProcess", "Downloading file: $fileName")
+                        downloadFileInChunks(encryptedFileRef, tempFile)
+                        Log.d("DownloadProcess", "Downloaded file: ${tempFile.absolutePath}")
+
+                        // Verifica o tamanho e formato do arquivo baixado
+                        val fileSize = tempFile.length()
+                        val fileFormat = getFileFormat(tempFile)
+                        Log.d("DownloadProcess", "Downloaded file size: $fileSize bytes")
+                        Log.d("DownloadProcess", "Downloaded file format: $fileFormat")
                     }
 
                     // Obtém o fileId do arquivo para descriptografia
                     val fileId = getFileId(fileName)
                     if (fileId == null) {
-                        Log.e("TAG", "File ID not found for fileName: $fileName")
+                        Log.e("DownloadProcess", "File ID not found for fileName: $fileName")
                         continue
                     }
 
                     // Descriptografa o arquivo
-                    val decryptedUris = decryptMediaFiles(listOf(encryptedFileRef), context, fileId)
-                    Log.d("TAG", "Decrypted URIs: $decryptedUris")
+                    Log.d("DownloadProcess", "Decrypting file: $fileName")
+                    val decryptedUris = decryptMediaFiles(listOf(tempFile.toUri()), context, fileId)
+                    Log.d("DownloadProcess", "Decrypted URIs: $decryptedUris")
 
                     // Move os arquivos descriptografados para a pasta de Downloads
                     decryptedUris.forEach { decryptedUri ->
-                        val outputFile = File(downloadDir, fileName.removeSuffix(".encrypted"))
+                        val outputFile = File(downloadDir, fileName.removeSuffix(".bin"))
                         decryptedUri.path?.let { filePath ->
                             val decryptedFile = File(filePath)
                             decryptedFile.copyTo(outputFile, overwrite = true)
-                            Log.d("TAG", "Decrypted file saved to: ${outputFile.absolutePath}")
+                            Log.d("DownloadProcess", "Decrypted file saved to: ${outputFile.absolutePath}")
+
+                            // Verifica o tamanho e formato do arquivo descriptografado
+                            val decryptedFileSize = outputFile.length()
+                            val decryptedFileFormat = getFileFormat(outputFile)
+                            Log.d("DownloadProcess", "Decrypted file size: $decryptedFileSize bytes")
+                            Log.d("DownloadProcess", "Decrypted file format: $decryptedFileFormat")
                         }
                     }
                 }
 
                 // Limpa a pasta temporária após descriptografar os arquivos
                 tempDir.listFiles()?.forEach { it.delete() }
-                Log.d("TAG", "Temporary files deleted")
+                Log.d("DownloadProcess", "Temporary files deleted")
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.e("TAG", "Error downloading or decrypting files", e)
+                Log.e("DownloadProcess", "Error downloading or decrypting files", e)
             }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private suspend fun downloadFileInChunks(fileRef: StorageReference, destFile: File, chunkSize: Long = 1024 * 1024) {
+        var offset: Long = 0
+        val hash = MessageDigest.getInstance("MD5")
+
+        destFile.outputStream().use { output ->
+            while (true) {
+                val range = offset until offset + chunkSize
+                try {
+                    val bytes = fileRef.getBytes(range.last).await()
+                    hash.update(bytes)
+                    output.write(bytes)
+                    offset += bytes.size
+                    if (bytes.size < chunkSize) break // Último bloco foi menor que o chunkSize, download completo
+                } catch (e: Exception) {
+                    Log.e("TAG", "Error downloading chunk", e)
+                    throw e
+                }
+            }
+        }
+
+        // Verifica se o hash do arquivo baixado corresponde ao hash esperado
+        val cloudHashString = fileRef.getMetadata().await().md5Hash
+        val localHash = hash.digest()
+
+        if (cloudHashString != null) {
+            val cloudHash = cloudHashString.hexStringToByteArray()
+
+            if (!cloudHash.contentEquals(localHash)) {
+                throw IOException("Hash verification failed. File may be corrupted.")
+            }
+        } else {
+            throw IOException("Cloud hash is null. Unable to verify file integrity.")
+        }
+
+        // Verifica o tamanho e formato do arquivo baixado
+        val fileSize = destFile.length()
+        val fileFormat = getFileFormat(destFile)
+        Log.d("TAG", "Downloaded file size: $fileSize bytes")
+        Log.d("TAG", "Downloaded file format: $fileFormat")
+    }
+
+    private fun String.hexStringToByteArray(): ByteArray {
+        val result = ByteArray(length / 2)
+
+        for (i in indices step 2) {
+            result[i / 2] = ((Character.digit(this[i], 16) shl 4) + Character.digit(this[i + 1], 16)).toByte()
+        }
+
+        return result
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getFileFormat(file: File): String {
+        return try {
+            Files.probeContentType(file.toPath()) ?: "Unknown"
+        } catch (e: IOException) {
+            "Unknown"
         }
     }
 }
