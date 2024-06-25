@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import com.fatecrl.safehide.LockScreenActivity
+import com.fatecrl.safehide.NoTouchableScreenActivity
 import com.fatecrl.safehide.services.FirebaseService.auth
 
 class AppLifecycleHandler : Application.ActivityLifecycleCallbacks {
@@ -34,6 +35,12 @@ class AppLifecycleHandler : Application.ActivityLifecycleCallbacks {
                     activity.startActivity(lockScreenIntent)
                 }
             }
+        }
+
+        if(LockScreenActivity.isPasswordCorrect){
+            val intent = Intent(activity, NoTouchableScreenActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            activity.startActivity(intent)
         }
     }
 

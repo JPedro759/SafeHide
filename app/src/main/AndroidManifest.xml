@@ -32,6 +32,9 @@
         <activity
             android:name=".KeySecretPageActivity"
             android:exported="false" />
+        <activity
+            android:name=".NoTouchableScreenActivity"
+            android:exported="false" />
 
         <activity
             android:name=".LockScreenActivity"

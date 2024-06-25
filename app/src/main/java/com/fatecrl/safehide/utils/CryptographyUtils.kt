@@ -2,12 +2,14 @@
 package com.fatecrl.safehide.utils
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
+import com.fatecrl.safehide.NoTouchableScreenActivity
 import com.fatecrl.safehide.services.CryptographyService.decryptMediaFiles
 import com.fatecrl.safehide.services.CryptographyService.encryptMediaFiles
 import com.fatecrl.safehide.services.FirebaseService.firestore
@@ -60,6 +62,7 @@ object CryptographyUtils {
 
             fileUploadTask.addOnSuccessListener {
                 Log.d("UploadProcess", "File uploaded: ${it.metadata?.path}")
+
             }.addOnFailureListener { exception ->
                 Log.e("UploadProcess", "File upload failed: ${exception.message}")
             }
