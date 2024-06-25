@@ -1,3 +1,4 @@
+
 package com.fatecrl.safehide
 
 import android.content.Intent

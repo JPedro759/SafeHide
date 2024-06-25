@@ -22,12 +22,6 @@ import com.google.firebase.database.ValueEventListener
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.security.SecureRandom
-import java.util.UUID
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
-import javax.crypto.spec.GCMParameterSpec
 
 interface FileDeleteListener {
     fun onDeleteFile(fileUri: Uri)
@@ -35,13 +29,12 @@ interface FileDeleteListener {
 
 class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
     private val user = auth.currentUser
-
     private var deleteListener: FileDeleteListener? = null
-
     private var currentItemView: View? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_list, parent, false)
+
         return FileViewHolder(view)
     }
 
@@ -49,7 +42,7 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
         if (position in 0 until fileList.size) {
             val fileUri = fileList[position]
 
-            holder.imageView.setImageURI(fileUri)
+            holder.imageView.setImageResource(R.drawable.ic_file) // Replace with your file icon
 
             val fileName = getFileNameFromUri(fileUri)
             holder.fileName.text = fileName
