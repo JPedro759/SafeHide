@@ -197,6 +197,13 @@ object CryptographyService {
                 if (uid!= null)
                     saveKeyToFirestore(uid, encryptedFileKey, "${fileUri.lastPathSegment}")
 
+                // Delete the original file
+                val originalFile = File(fileUri.path ?: "")
+                if (originalFile.exists()) {
+                    originalFile.delete()
+                    Log.d("Encryption", "Original file deleted: ${originalFile.absolutePath}")
+                }
+
                 println("Arquivo criptografado com sucesso: $fileUri")
             }
         }
