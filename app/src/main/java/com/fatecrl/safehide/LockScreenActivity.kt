@@ -122,7 +122,6 @@ class LockScreenActivity : Activity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        // Desabilitar outros botões físicos (como volume, energia, etc.)
         return if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
             keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             true
