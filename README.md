@@ -1,7 +1,7 @@
 # <img height="45" width="40" src="https://github.com/JPedro759/SafeHide/assets/77515431/e96c0538-663a-47b3-ad41-86636786052f"> SafeHide
 
 
-O crescente uso de dispositivos móveis transformou nossa comunicação, trabalho e lazer, facilitando tarefas com smartphones e aplicativos. Contudo, isso também trouxe ameaças de segurança, como roubo de informações e vazamento de dados. Para mitigar esses riscos, está sendo desenvolvido um aplicativo que tem como objetivo criptografar e proteger arquivos selecionados pelo usuário, armazenando-os em uma pasta segura. O aplicativo usa algoritmos de criptografia robustos e tem uma interface intuitiva, oferecendo uma camada adicional de proteção para dados em dispositivos móveis.
+O crescente uso de dispositivos móveis transformou nossa comunicação, trabalho e lazer, facilitando tarefas com smartphones e aplicativos. Contudo, isso também trouxe ameaças de segurança, como roubo de informações e vazamento de dados. Para mitigar esses riscos, está sendo desenvolvido um aplicativo que tem como objetivo criptografar e proteger arquivos selecionados pelo usuário, guardando-os em um armazenamento seguro. O aplicativo usa algoritmos de criptografia robustos e tem uma interface intuitiva, oferecendo uma camada adicional de proteção para dados em dispositivos móveis.
 
 # Tecnologias
 <div>
