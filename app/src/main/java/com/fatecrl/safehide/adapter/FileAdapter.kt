@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,7 +48,7 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
             val fileName = getFileNameFromUri(fileUri)
             holder.fileName.text = fileName
 
-            val fileSize = getFileSize(fileUri, holder.itemView.context)
+            val fileSize = getFileSize(fileUri)
             holder.fileSize.text = fileSize
 
             holder.buttonDelete.setOnClickListener {
@@ -98,15 +99,16 @@ class FileAdapter : RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
         return fileName?.substring(0, 20) + "..."
     }
 
-    private fun getFileSize(uri: Uri, context: Context): String {
-        val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
-        var fileSizeInKB = 0.0
+    private fun getFileSize(uri: Uri): String {
+        val file = uri.path?.let { File(it) }
 
-        inputStream?.use { input ->
-            fileSizeInKB = (input.available() / 1024).toDouble()
+        return if (file != null && file.exists()) {
+            val fileSizeInKB = file.length() / 1024.0
+            "$fileSizeInKB KB"
+        } else {
+            Log.e("FileAdapter", "File not found: ${uri.path}")
+            "?? KB"
         }
-
-        return "$fileSizeInKB KB"
     }
 
     private fun showFileDeletedMessage() {
